@@ -1,0 +1,1500 @@
+//----------------------------------------------------------------------------------------------// define
+// motor defines
+#define rmot                 mr     // rechter Motor
+#define lmot		             ml    //  linker Motor
+#define greifarm		         OUT_B    // motor für greifarm
+#define mots                 OUT_AC                    //motoren
+#define off                  Off(OUT_ABC);             // aus für alle motoren
+
+// white difines
+#define weiss1               SENSOR_2 > wss2-pm_white && SENSOR_2 < wss2+pm_white+pm_silver
+#define weiss2               SENSOR_1 > wss1-pm_white && SENSOR_1 < wss1+pm_white+pm_silver
+#define weiss3               SENSOR_4 > wss4-pm_white && SENSOR_4 < wss4+pm_white+pm_silver
+#define weiss4               SENSOR_3 > wss3-pm_white && SENSOR_3 < wss3+pm_white+pm_silver
+
+// black defines
+#define schwarz1             SENSOR_2 > sw2-pm_dunkel && SENSOR_2 < sw2+pm_black
+#define schwarz2             SENSOR_1 > sw1-pm_dunkel && SENSOR_1 < sw1+pm_black
+#define schwarz3             SENSOR_4 > sw4-pm_dunkel && SENSOR_4 < sw4+pm_black
+#define schwarz4             SENSOR_3 > sw3-pm_dunkel && SENSOR_3 < sw3+pm_black
+
+// touch defines
+#define touchU               SENSOR_3 == 100
+#define touchO               SENSOR_2 == 100
+#define rampen_touch         SENSOR_2 >= 78 && SENSOR_2 < 100
+#define greifarm_touch       SENSOR_4 == 100
+
+// if defines
+#define schwarz_links        timer = 0; if(schwarz1 || schwarz2){ SteinTimer = 0; schwarzgesehen = 1; goto Lschwarz; }
+#define schwarz_rechts       timer = 0; if(schwarz3 || schwarz4){ SteinTimer = 0; schwarzgesehen = 1; goto Rschwarz; }
+#define silberline           silber1 && (silber3 || silber4)
+
+// reg_modes
+#define sync                 OUT_REGMODE_SYNC
+#define speed                OUT_REGMODE_SPEED
+
+// move defines
+#define fwd		     OnFwd(rmot,r_pow); OnFwd(lmot,l_pow)
+#define rev		     OnRev(rmot,r_rev); OnRev(lmot,l_rev)
+
+
+#define DoThisBeforeTheProgramStarts ;
+//------------------------------------------------------------------------------------------------------------// Variablen
+
+ string podest = "nD";           // nicht definiert
+ string richtung = "nach_hinten";
+
+ bool umfahren_rechts  = false;       // ob der robo den stein rechts umfahren soll
+ bool umfahren_links   = true;        // ob der robo den stein links umfahren soll
+ bool RoteZone         = false;       // ob der robo in der rotenZone ist
+ bool rampe            = false;       // ob der robo auf der rampe ist
+ bool rampe_getoucht_oben = false;    // ob oben gegen wand von rampe aus gekommn is
+ bool sensor           = true;        // ob sensor1 reagieren soll
+ bool dosegef          = false;       // dose gefunden
+ bool rampe_suchen     = true;        //rampe suchen halt..
+ bool rz_anders         = false;       //rz = 2 methoden
+ bool rampe_linie = false;                  // muss am anfang auf false sein
+ bool rz_erkennen = true;
+
+ long timer = 0;      // timer für erkennen der rotenZone
+
+  int sw1 = 0, sw2 = 0, sw3 = 0, sw4 = 0;            // 31,26,34,32sw = schwarz
+ int pm_black = 0;                                          //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIINNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ int wss1 = 41, wss2 = 38, wss3 = 44, wss4 = 42;    // wss = weiss
+ int pm_white = 4; // 5
+ int pm_silver  = 9;
+ int pm_dunkel  = 18;
+
+ int mr, ml, s1, s2;
+
+ int r_pow                =  85;   // Power Rechts
+ int l_pow                =  88;   // Power Links
+ int r_rev               =  85;  // Power Rückwaerts Rechts
+ int l_rev               =  89;  // Power Rückwaerts Links
+ int motpow               = 85;   // geschwindigkeit
+
+ int WTouch              =   0;   // rampe doppeltouch
+ int first               =   0;
+ int t2 = 0;
+
+//-------------------------------------------------------------------------------------------------// timer Task
+
+int Timer3 = 0;
+
+task Timer() {
+ while(true) {
+   timer ++;
+   Wait(10);
+ }
+}
+task Rampentimer() {
+ while(true) {
+  Wait(350);                           //300
+  WTouch= 0;
+
+ }
+}
+task Licht() {
+ while(true) {
+  if(sensor == false) {
+   Wait(590);
+   sensor = true;
+  }
+ }
+}
+task fail() {
+ while(!RoteZone) {
+   Wait(10);
+  if(greifarm_touch) {
+   t2++;
+   if(t2 > 150) {
+    OnFwd(OUT_B,80);
+    Wait(400);
+    Off(OUT_B);
+   }
+  } else {
+   t2 = 0;
+  }
+ }
+}
+task timer3() {
+  while(true) {
+   Timer3++;
+   Wait(400);
+   ClearScreen();
+  }
+}
+task rampe_linie_timer() {
+ while(rampe) {
+   Wait(1000);
+   rampe_linie = true;
+ }
+}
+//-------------------------------------------------------------------------------------------------------// display task
+task display() {
+ while(true) {
+  ClearScreen();
+  TextOut(1, LCD_LINE1, "S-1: " + NumToStr(SENSOR_2));
+  TextOut(1, LCD_LINE2, "S-2: " + NumToStr(SENSOR_1));
+  TextOut(1, LCD_LINE3, "S-3: " + NumToStr(SENSOR_4));
+  TextOut(1, LCD_LINE4, "S-4: " + NumToStr(SENSOR_3));
+  NumOut(1, LCD_LINE7, t2);
+  Wait(100);
+ }
+}
+//-------------------------------------------------------------------- ------------------------------------// main Task
+task main() {
+ start Timer;
+ start display;
+ start Rampentimer;
+ start Licht;
+ start timer3;
+ start fail;
+
+ SetSensorLight(S2);
+ SetSensor(S1,SENSOR_LIGHT);
+ SetSensor(S4,SENSOR_LIGHT);
+ SetSensorLight(S3);
+ ClearScreen();
+ 
+ mr = OUT_A;
+ ml = OUT_C;
+ s1 = S1;
+ s2 = S4;
+
+#define touch1               Sensor(s1) == 100
+#define touch2               Sensor(s2) == 100
+
+//---------------------------------------------------------------------------------------------------Sicherung für Sensoren-FAIL
+ while(SENSOR_1 == 0 || SENSOR_2 == 0 || SENSOR_3 == 0 || SENSOR_4 == 0) {
+  Off(OUT_ABC);
+ }
+ DoThisBeforeTheProgramStarts;
+
+//-----------------------------------------------------------------------------------------------------------------
+ if(touchU && touchO) {
+  Wait(1000);
+  if(touchU && touchO) {
+   OnFwd(lmot, l_pow);
+   OnFwd(rmot, r_pow);
+   Wait(5000);
+   OnRev(lmot, l_rev);
+   OnRev(rmot, r_rev);
+   Wait(5000);
+  }
+ }
+//---------------------------------------------------------------------------------------------------------------// Wiederholung wenn wahr
+ while(true) {
+  anfang:
+  OnFwd(lmot, l_pow);
+  OnFwd(rmot, r_pow);
+
+  if(timer >= 180 && rz_erkennen) {
+//   PlayTone(523,1200);
+   RoteZone = true;
+   timer = 0;
+   goto roteZone;
+  }
+
+//-------------------
+  if(rampen_touch ) {
+   rampe = true;
+   goto Rampe;
+  }
+
+  Rampe:
+  if(rampe)
+   start rampe_linie_timer;
+  while(rampe) {
+   timer = 0;
+   OnFwd(rmot, 127);
+   OnFwd(lmot, 127 );
+   if((schwarz1) && rampe_linie) {
+    OnRev(lmot, l_rev-30);
+    Wait(100);
+    off;
+    rampe_linie = false;
+   }
+   if((schwarz2) && rampe_linie) {
+    OnRev(lmot, l_rev-30);
+    Wait(50);
+    off;
+    rampe_linie = false;
+   }
+   if((schwarz3) && rampe_linie) {
+    OnRev(rmot, r_rev-30);
+    Wait(50);
+    off;
+    rampe_linie = false;
+   }
+   if((schwarz4) && rampe_linie) {
+    OnRev(rmot, r_rev-30);
+    Wait(100);
+    off;
+    rampe_linie = false;
+   }
+   if(touch1 && WTouch < 2) {
+    off;
+    OnFwd(lmot, l_pow);
+    OnRev(rmot, r_rev -30);
+    Wait(200);
+    WTouch ++;
+   }
+   if(touch2 && WTouch < 2) {
+    off;
+    if(!rampe_getoucht_oben) {
+     OnFwd(rmot, r_pow);
+     OnRev(lmot, l_rev -30);
+    } else {
+     OnFwd(lmot, l_pow);
+     OnRev(rmot, r_rev -30);
+    }
+    Wait(200);
+    WTouch ++;
+   }
+   if((touch1) && WTouch == 2) {
+    rampe_getoucht_oben = true;
+    off;
+    OnRev(rmot, r_rev);
+    OnRev(lmot, l_rev);
+    Wait(950);
+    OnFwd(rmot,r_pow);
+    OnRev(lmot,l_rev);
+    Wait(250);
+    int i1 = 0;
+    until(touch1 && touch2 || i1 >= 150){
+     OnFwd(rmot,r_pow);
+     OnFwd(lmot,l_pow);
+     i1 ++;
+     Wait(10);
+    }
+    for(int plattform = 0; plattform < 130; plattform ++) {
+     OnRev(lmot, l_pow -30);
+     OnRev(rmot, r_pow);
+     if(schwarz3 || schwarz4) {
+      OnRev(lmot, l_pow);
+      OnRev(rmot, r_pow);
+      Wait(200);
+      rampe = false;
+      timer = 0;
+      goto anfang;
+     }
+     Wait(10);
+    }
+    OnRev(lmot, l_pow);
+    OnRev(rmot, r_pow);
+    Wait(200);
+    rampe = false;
+    timer = 0;
+    goto anfang;
+   }
+   if((touch2) && WTouch == 2) {
+    rampe_getoucht_oben = true;
+    off;
+    OnRev(rmot, r_rev);
+    OnRev(lmot, l_rev);
+    Wait(950);
+    OnFwd(lmot,l_pow);
+    OnRev(rmot,r_rev);
+    Wait(250);
+    int i2 = 0;
+    until(touch1 && touch2 || i2 >= 150){
+     OnFwd(rmot,r_pow);
+     OnFwd(lmot,l_pow);
+     i2 ++;
+     Wait(10);
+    }
+    for(int plattform = 0; plattform < 130; plattform ++) {
+     OnRev(lmot, l_pow -30);
+     OnRev(rmot, r_pow);
+     if(schwarz3 || schwarz4) {
+      OnRev(lmot, l_pow);
+      OnRev(rmot, r_pow);
+      Wait(200);
+      rampe = false;
+      timer = 0;
+      goto anfang;
+     }
+     Wait(10);
+    }
+    OnRev(lmot, l_pow);
+    OnRev(rmot, r_pow);
+    Wait(200);
+    rampe = false;
+    timer = 0;
+    goto anfang;
+   }
+  }
+//-----------------------------------------
+  if(schwarz1 && sensor) {
+   timer = 0;
+   off;
+   for(int line = 0; line < 48; line ++) {
+    timer = 0;
+    OnFwd(rmot, r_pow);
+    OnRev(lmot, l_rev /1.5);
+    Wait(10);
+    if(schwarz4 && line <= 10) {
+     off;
+     OnFwd(lmot, l_pow);
+     OnFwd(rmot, r_pow);
+     Wait(150);
+     OnFwd(lmot, l_pow);
+     OnRev(rmot, r_rev);
+     Wait(480);
+     timer = 0;
+     goto anfang;
+    }
+    else if(schwarz4) {
+     off;
+     OnFwd(rmot, r_pow);
+     OnFwd(lmot, l_pow);
+     Wait(80);
+     OnFwd(lmot, l_pow);
+     OnRev(rmot, r_rev);
+     Wait(180);
+     timer = 0;
+     goto anfang;
+    }
+   }
+  }
+  if(schwarz2 && sensor) {
+   timer = 0;
+   off;
+   //drall_l = 5;
+   //drall_r = 0;
+   for(int line = 0; line < 2; line ++) {
+    timer = 0;
+    OnFwd(rmot, r_pow);
+    OnRev(lmot, l_rev /1.5);
+    Wait(07);
+    if(schwarz4 && line <= 10) {
+     OnFwd(lmot, l_pow);
+     OnFwd(rmot, r_pow);
+     Wait(150);
+     OnFwd(lmot, l_pow);
+     OnRev(rmot, r_rev);
+     Wait(480);
+     timer = 0;
+     goto anfang;
+    }
+   }
+  }
+  if(schwarz3) {
+   timer = 0;
+   off;
+   //drall_r = 5;
+   //drall_l = 0;
+   OnFwd(lmot, l_pow);
+   OnRev(rmot, r_rev /2);
+   Wait(14);
+  }
+
+  if(schwarz4) {
+   timer = 0;
+   off;
+   sensor = false;
+   OnFwd(lmot, l_pow);
+    OnFwd(rmot, r_rev );
+    Wait(05);
+    OnFwd(lmot, l_pow);
+    OnRev(rmot, r_rev );
+    Wait(480);
+    timer = 0;
+  }
+//----------------------------------------------------------// touchsensoren Stein links umfahren
+//----------------------------------------------------------// touchsensoren Stein links umfahren
+  if(touch1) {
+   OnFwd(rmot,r_pow +10);
+   OnFwd(lmot,l_pow);
+   Wait(380);
+   timer = 0;
+   if((touchO || touchU)) {
+    timer = 0;
+    goto stein;
+   }
+   else {
+    off;
+    OnRev(lmot, l_rev);
+    OnRev(rmot, r_rev);
+    Wait(100);
+    OnFwd(lmot, l_pow);
+    OnRev(rmot, r_rev);
+    Wait(210);
+    fwd;
+    Wait(200);
+    timer = 0;
+    goto anfang;
+   }
+  }
+  if(touch2) {
+   OnFwd(rmot,r_pow);
+   OnFwd(lmot,l_pow +10);
+   Wait(380);
+   timer = 0;
+   if((touchO || touchU)) {
+    timer = 0;
+    goto stein;
+   }
+   else {
+    off;
+    OnRev(rmot, r_rev);
+    OnRev(lmot, l_rev);
+    Wait(100);
+    OnFwd(rmot, r_rev);
+    OnRev(lmot, l_pow);
+    Wait(210);
+    fwd;
+    Wait(200);
+    //fail_save ++;
+    timer = 0;
+    goto anfang;
+   }
+  }
+
+  stein:
+   if((touchO || touchU) && umfahren_links) {
+    rz_erkennen = false;
+    timer  = 0;
+    OnRev(rmot,r_rev);
+    OnRev(lmot,l_rev);
+    Wait(500);
+    bool steinigung = false;
+    for(int i = 0; i < 100; i++) {
+     OnFwd(rmot, motpow);
+     OnRev(lmot, motpow);
+     Wait(3);
+     if(schwarz1 || schwarz2 || schwarz3 || schwarz4)
+      steinigung = true;
+    }
+    if(steinigung) {
+     OnFwd(OUT_AC, motpow);
+     Wait(500);
+     steinroutine_links:
+     until(schwarz3 || schwarz4) {
+      if(touchO || touchU)
+       goto stein;
+      OnFwd(OUT_AC, motpow);
+      Wait(25);
+      OnRev(rmot, motpow);
+      OnFwd(lmot, motpow);
+      Wait(12);
+      if(touch2){
+       OnFwd(rmot, motpow);
+       OnRev(lmot, motpow);
+       Wait(200);
+      }
+     }
+     Timer3 = 0;
+     while(Timer3 < 1 || schwarz3 || schwarz4) {
+      OnFwd(OUT_AC, motpow);
+      if(schwarz3 || schwarz4)
+       Timer3 = 0;
+      if(schwarz1 || schwarz2/* || ssr == true*/) {
+       OnFwd(OUT_AC, motpow);
+       Wait(300);
+       until(schwarz3 || schwarz4) {
+        OnFwd(rmot, motpow);
+        OnRev(lmot, motpow);
+       }
+       Timer3 = 1;
+       timer = 0;
+    rz_erkennen = true;
+       goto anfang;
+      }
+     }
+    }
+
+   }
+   if((touchO || touchU) && umfahren_rechts) {
+    rz_erkennen = false;
+    timer  = 0;
+    OnRev(rmot,r_rev);
+    OnRev(lmot,l_rev);
+    Wait(500);
+    bool steinigung = false;
+    for(int i = 0; i < 100; i++) {
+     OnFwd(lmot, motpow);
+     OnRev(rmot, motpow);
+     Wait(3);
+     if(schwarz1 || schwarz2 || schwarz3 || schwarz4)
+      steinigung = true;
+    }
+    if(steinigung) {
+     OnFwd(OUT_AC, motpow);
+     Wait(500);
+     steinroutine_rechts:
+     until(schwarz1 || schwarz2) {
+      if(touchO || touchU)
+       goto stein;
+      OnFwd(OUT_AC, motpow);
+      Wait(25);
+      OnRev(lmot, motpow);
+      OnFwd(rmot, motpow);
+      Wait(12);
+      if(touch1) {
+       OnFwd(lmot, motpow);
+       OnRev(rmot, motpow);
+       Wait(200);
+      }
+     }
+     Timer3 = 0;
+     while(Timer3 < 1 || schwarz1 || schwarz2) {
+      OnFwd(OUT_AC, motpow);
+      if(schwarz1 || schwarz2)
+       Timer3 = 0;
+      if(schwarz3 || schwarz4/* || ssr == true*/) {
+       OnFwd(OUT_AC, motpow);
+       Wait(300);
+       until(schwarz1 || schwarz3) {
+        OnFwd(lmot, motpow);
+        OnRev(rmot, motpow);
+       }
+       Timer3 = 1;
+       timer = 0;
+    rz_erkennen = true;
+       goto anfang;
+      }
+     }
+    }
+
+  }
+ }
+//------------------------------------------------------------------------------------------------// rote Zone
+ roteZone:
+ if(RoteZone) {
+  PlayTone(523,1200);
+  r_pow = 77;
+  l_pow = 80;
+  r_rev = 77;
+  l_rev = 82;
+  motpow = 77;
+  if(rz_anders) {
+   mr = OUT_C;
+   ml = OUT_A;
+   s1 = S4;
+   s2 = S1;
+   int r_pow_save = r_pow;
+   int r_rev_save = r_rev;
+   r_pow = l_pow;
+   r_rev = l_rev;
+   l_pow = r_pow_save;
+   l_rev = r_rev_save;
+  }
+  goto rz2;
+ }
+ while(RoteZone){                            //-///////////////////////////////////////////////////////////////////////////////////////////////
+  rz2:
+  OnFwd(rmot,r_pow);
+  OnFwd(lmot,l_pow +6);
+  timer = 0;
+  if(schwarz1 || schwarz2 || schwarz3 || schwarz4) {
+   RoteZone = false;
+   timer = 0;
+   goto anfang;
+  }
+  if(touch1 && touch2)
+   goto orientiert;
+  if(touch2) {
+   OnFwd(rmot,r_pow -10);
+   OnFwd(lmot,l_pow );
+   Wait(540);
+   if(touch1 && touch2)
+    goto orientiert;
+   else {
+    OnRev(rmot,r_rev);
+    OnRev(lmot,l_rev);
+    Wait(100);
+    off;
+    OnFwd(rmot,r_pow);
+    OnRev(lmot,l_pow);
+    Wait(170);
+    off;
+   }
+  }
+  if(touch1) {
+   for(int wall =0; wall < 54; wall ++) {
+    OnFwd(lmot,l_pow +5);
+    OnFwd(rmot,r_pow );
+    Wait(10);
+    if(touch2 && touch1) {
+     goto orientiert;
+    }
+   }
+   OnFwd(rmot,r_pow);
+   OnFwd(lmot,l_pow);
+   Wait(1000);
+   off;
+   goto orientiert;
+  }
+  if(touchO){
+   dosegef = true;
+   goto dose;
+  }
+  if(touchU) {
+   fwd;
+   Wait(600);
+   if(touchO)
+    { dosegef = true; goto dose; }
+   OnFwd(lmot,l_pow);
+   OnFwd(rmot,r_pow +6);
+   Wait(300);
+   podest = "rechts_vorne";
+   goto podest_1;
+  }
+ }
+ do {                                          // neu !!
+ orientiert:
+ off;
+ rev;
+ Wait(500);
+ off;
+ OnFwd(OUT_B, 80);
+ Wait(900);
+ for(int i = 0; i < 190; i++) {
+  OnRev(greifarm,80);
+  Wait(10);
+  if(greifarm_touch) {
+   break;
+  }
+ }
+ OnFwd(greifarm, 80);
+ Wait(900);
+ OnRev(greifarm, 80);
+ Wait(450);
+ Off(greifarm);
+ OnRev(lmot,l_rev);
+ Wait(500);
+ off;
+ OnRev(rmot,r_rev);
+ OnRev(lmot,l_rev);
+ Wait(1000);
+ off;
+ OnFwd(rmot,r_pow);
+ OnRev(lmot,l_rev); //--
+ Wait(150);
+ off;
+ for(int i = 0; i < 70; i++) {
+  OnFwd(lmot,l_pow);
+  OnFwd(rmot,r_pow-10);
+  Wait(10);
+  if(touch1 && touch2)
+   break;
+  if(touch2){
+   off;
+   for(int ii =0;ii<400;ii++) {
+    OnFwd(lmot, l_pow-20);
+    Wait(10);
+    if(touch1 && touch2)
+     break;
+   }
+   break;
+  }
+ }
+ for(int i = 0;i<400;i++) {
+  OnFwd(lmot,l_pow-10);
+  Wait(10);
+  if(touch1 && touch2)
+   break;
+  if(touch2){
+   off;
+   for(int ii =0;ii<400;ii++) {
+    OnFwd(lmot, l_pow-20);
+    Wait(10);
+    if(touch1 && touch2)
+     break;
+   }
+   break;
+  }
+ }
+ Wait(100);
+ off;
+ RotateMotor(lmot,-l_rev,500);
+ off;
+ RotateMotor(rmot,r_pow,470);
+ off;
+ for(int back = 0; back < 500; back ++) {
+  OnRev(rmot,r_rev);
+  OnRev(lmot,l_rev);
+  Wait(10);
+  if((greifarm_touch)){
+   rev;
+   Wait(400);
+   break;
+  }
+ }
+ rev;
+ Wait(400);
+ goto suchen;   }while(false);
+//------------------------------------------------------------------------------//
+ suchen:
+ fwd;
+ Wait(900);
+//-----------------------------------------------------------------------------------------------------------------------------------------------------//
+//---------------------------------------------------------------------------------------------------------------------------------------//
+ while(richtung == "nach_vorne" && podest == "nD" ) {
+  OnFwd(lmot,l_pow);
+  OnFwd(rmot,r_pow);
+  if(touchO)
+   { dosegef = true; goto dose; }
+  if(touch1 && touch2) {
+   wand_vorne:
+   rev;
+   Wait(1300);
+   off;
+   RotateMotor(lmot,l_pow,1400);
+   off;
+   RotateMotor(rmot,-r_pow,600);
+   off;
+   for(int i = 0; i < 170; i++) {
+    rev;
+    if(greifarm_touch) {
+     rev;
+     Wait(400);
+     richtung = "nach_hinten";
+     goto suchen;
+    }
+    Wait(10);
+   }
+   richtung = "nach_hinten";
+   goto suchen;
+  }
+ }
+//--------------------------------------------------------------------------------------------------------------------------//
+ while(richtung == "nach_hinten" && podest == "nD") {
+  OnFwd(lmot,l_pow);
+  OnFwd(rmot,r_pow);
+  if(touchO)
+   { dosegef = true; goto dose; }
+  if(touch1 && touch2) {
+   wand_hinten:
+   first++;
+   rev;
+   Wait(1300);
+   OnFwd(rmot,r_pow);
+   OnRev(lmot,l_rev);
+   Wait(600);
+   for(int i = 0; i < 170; i ++) {
+    fwd;
+    Wait(10);
+//-----------------------------------------------------------------
+    if(touchU) {
+     rev;
+     Wait(i*10);
+     OnFwd(lmot,l_pow);
+     OnRev(rmot,r_rev);
+     Wait(600);
+     off;
+     fwd;
+     Wait(2500);
+     rev;
+     Wait(1000);
+     until(greifarm_touch) {
+      rev;
+     }
+     off;
+     RotateMotor(rmot,r_pow,1000);
+     off;
+     RotateMotor(lmot,l_pow,1000);
+     off;
+     until(greifarm_touch) {
+      rev;
+     }
+     fwd;
+     Wait(2000);
+     richtung = "nach_hinten";
+     goto suchen;
+    }
+//--------------------------------------------------------------
+   }
+   rev;
+   Wait(1300);
+   OnFwd(lmot,l_pow);
+   OnRev(rmot,r_rev);
+   Wait(600);
+   off;
+   for(int i = 0; i < 170;i++){
+    fwd;
+    if(touchO) {
+     dosegef = true;
+     goto dose;
+    }
+    Wait(10);
+   }
+   rev;
+   Wait(1300);
+   off;
+   RotateMotor(rmot,r_pow,1400);
+   off;
+   RotateMotor(lmot,-l_pow,600);
+   off;
+   for(int i = 0;i< 80; i++) {
+    rev;
+    if(greifarm_touch) {
+     rev;
+     Wait(400);
+     richtung = "nach_vorne";
+     goto suchen;
+    }
+    Wait(10);
+   }
+   richtung = "nach_vorne";
+   goto suchen;
+  }
+  if(touchU && first == 0) {
+   fwd;
+   Wait(600);
+   if(touchO) {
+    dosegef = true;
+    goto dose;
+   }
+   podest = "rechts_hinten";
+   goto podest_r_h;
+  } else if(touchU) {
+   fwd;
+   Wait(600);
+   if(touchO) {
+    dosegef = true;
+    goto dose;
+   }
+  }
+ }
+//------------------------------------------------------------------------------//
+//---------------------------------------------------------------------------------------------------------------------------------------//
+ while(richtung == "nach_hinten" && podest == "rechts_hinten" ) {
+  OnFwd(lmot,l_pow);
+  OnFwd(rmot,r_pow);
+  if(touchO)
+   { dosegef = true; goto dose; }
+  if(touch1 && touch2) {
+   rev;
+   Wait(1500);
+   OnRev(rmot,r_rev);
+   OnFwd(lmot,l_pow);
+   Wait(600);
+   for(int i = 0; i < 110; i ++) {
+    fwd;
+    Wait(10);
+
+//-----------------------------------------------------------------
+    if(touchU) {
+     rev;
+     Wait(i*10);
+     OnRev(lmot,l_rev);
+     OnFwd(rmot,r_pow);
+     Wait(600);
+     off;
+     fwd;
+     Wait(1000);
+     rev;
+     Wait(1000);
+     until(greifarm_touch) {
+      rev;
+     }
+     off;
+     RotateMotor(lmot,l_pow,1000);
+     off;
+     RotateMotor(rmot,r_pow,1000);
+     off;
+     until(greifarm_touch) {
+      rev;
+     }
+     fwd;
+     Wait(1000);
+     richtung = "nach_hinten";
+     goto suchen;
+    }
+//--------------------------------------------------------------
+   }
+   rev;
+   Wait(1100);
+   OnRev(lmot,l_rev);
+   OnFwd(rmot,r_pow);
+   Wait(600);
+   off;
+   for(int i = 0; i < 170;i++){
+    fwd;
+    if(touchO) {
+     dosegef = true;
+     goto dose;
+    }
+    Wait(10);
+   }
+   rev;
+   Wait(800);
+   off;
+   off;
+   RotateMotor(lmot,l_pow,1400);
+   off;
+   RotateMotor(rmot,-r_pow,600);
+   off;
+   for(int i = 0; i < 80; i++) {
+    rev;
+    if(greifarm_touch) {
+     rev;
+     Wait(400);
+     richtung = "nach_vorne";
+     goto suchen;
+    }
+    Wait(10);
+   }
+   richtung = "nach_vorne";
+   goto suchen;
+  }
+  if(touchU) {
+   fwd;
+   Wait(600);
+   if(touchO) {
+    dosegef = true;
+    goto dose;
+   }
+  }
+ }
+//--------------------------------------------------------------------------------------------------------------------------//
+ while(richtung == "nach_vorne" && podest == "rechts_hinten") {
+  OnFwd(lmot,l_pow);
+  OnFwd(rmot,r_pow);
+  if(touchO)
+   { dosegef = true; goto dose; }
+  if(touch1 && touch2) {
+   rev;
+   Wait(1000);
+   off;
+   RotateMotor(rmot,r_pow,1400);
+   off;
+   RotateMotor(lmot,-l_pow,600);
+   off;
+   for(int i = 0;i< 80; i++) {
+    rev;
+    if(greifarm_touch) {
+     rev;
+     Wait(400);
+     richtung = "nach_hinten";
+     goto suchen;
+    }
+    Wait(10);
+   }
+   richtung = "nach_hinten";
+   goto suchen;
+  }
+ }
+//------------------------------------------------------------------------------//
+ while(richtung == "nach_rechts" && podest == "rechts_vorne" ) {
+  OnFwd(lmot,l_pow);
+  OnFwd(rmot,r_pow);
+  if(touchO)
+   { dosegef = true; goto dose; }
+  if(touch1 && touch2) {
+   off;
+   rev;
+   Wait(1200);
+   OnRev(rmot,r_rev);
+   OnFwd(lmot,l_pow);
+   Wait(600);
+   for(int i = 0; i < 130; i ++) {
+    fwd;
+    Wait(10);
+//-----------------------------------------------------------------
+    if(touchU) {
+     rev;
+     Wait(i*10);
+     OnRev(lmot,l_rev);
+     OnFwd(rmot,r_pow);
+     Wait(600);
+     off;
+     fwd;
+     Wait(2500);
+     rev;
+     Wait(1000);
+     until(greifarm_touch) {
+      rev;
+     }
+     off;
+     RotateMotor(lmot,l_pow,1000);
+     off;
+     RotateMotor(rmot,r_pow,1000);
+     off;
+     until(greifarm_touch) {
+      rev;
+     }
+     fwd;
+     Wait(2000);
+     richtung = "nach_hinten";
+     goto suchen;
+    }
+//--------------------------------------------------------------
+   }
+   rev;
+   Wait(1300);
+   OnRev(lmot,l_rev);
+   OnFwd(rmot,r_pow);
+   Wait(600);
+   off;
+   for(int i = 0; i < 205;i++){
+    fwd;
+    if(touchO) {
+     dosegef = true;
+     goto dose;
+    }
+    Wait(10);
+   }
+   rev;
+   Wait(1300);
+   off;
+   RotateMotor(lmot,l_pow,1400);
+   off;
+   RotateMotor(rmot,-r_pow,600);
+   off;
+   for(int i = 0; i < 80; i++) {
+    rev;
+    if(greifarm_touch) {
+     rev;
+     Wait(400);
+     richtung = "nach_links";
+     goto suchen;
+    }
+    Wait(10);
+   }
+   richtung = "nach_links";
+   goto suchen;
+  }
+  if(touchU) {
+   fwd;
+   Wait(600);
+   if(touchO) {
+    dosegef = true;
+    goto dose;
+   }
+  }
+ }
+//--------------------------------------------------------------------------------------------------------------------------//
+ while(richtung == "nach_links" && podest == "rechts_vorne") {
+  OnFwd(lmot,l_pow);
+  OnFwd(rmot,r_pow);
+  if(touchO)
+   { dosegef = true; goto dose; }
+  if(touch1 && touch2) {
+   rev;
+   Wait(1200);
+   off;
+   RotateMotor(rmot,r_pow,1400);
+   off;
+   RotateMotor(lmot,-l_pow,600);
+   off;
+   for(int i = 0;i< 80; i++) {
+    rev;
+    if(greifarm_touch) {
+     rev;
+     Wait(400);
+     richtung = "nach_rechts";
+     goto suchen;
+    }
+    Wait(10);
+   }
+   rev;
+   Wait(200);
+   richtung = "nach_rechts";
+   goto suchen;
+  }
+ }
+
+//------------------------------------------------------------------------------//
+ podest_1:
+ if(podest == "rechts_vorne") {
+ OnFwd(OUT_B, 80);
+ Wait(900);
+ for(int i = 0; i < 190; i++) {
+  OnRev(greifarm,80);
+  Wait(10);
+  if(greifarm_touch) {
+   break;
+  }
+ }
+ OnFwd(greifarm, 80);
+ Wait(900);
+ OnRev(greifarm, 80);
+ Wait(450);
+ Off(greifarm);
+  OnRev(rmot,r_rev);
+  OnRev(lmot,l_rev);
+  Wait(800);
+  off;
+  RotateMotor(lmot,l_rev,-1500);
+  off;
+  for(int i = 0; i < 80; i++) {
+   OnRev(rmot,r_rev);
+   OnRev(lmot,l_rev);
+   Wait(10);
+   if(greifarm_touch)   {
+    rev;
+    Wait(500);
+    break;       }
+  }
+  rev;
+    Wait(500);
+  OnFwd(lmot,l_pow);
+  OnFwd(rmot,r_pow);
+  Wait(1000);
+  until(touch1 && touch2) {
+   fwd;
+   if(touchO)
+    { dosegef = true; goto dose; }
+  }
+  OnRev(rmot,r_rev);
+  OnRev(lmot,l_rev);
+  Wait(3000);
+  off;
+  RotateMotor(rmot,r_pow,1000);
+  off;
+  until(touch1 && touch2) {
+   fwd;
+   if(touchO)
+    { dosegef = true; goto dose; }
+  }
+  rev;
+  Wait(1000);                                                                                                 //mal gucken
+  off;
+  RotateMotor(lmot,l_pow,1000);
+  off;
+  until(touch1 && touch2) {
+   fwd;
+   if(touchO)
+    { dosegef = true; goto dose; }
+  }
+  rev;
+  Wait(1000);
+  off;
+  RotateMotor(lmot,l_pow,1000);
+  off;
+  for(int i = 0;i<100; i++) {
+   rev;
+   Wait(10);
+   if(greifarm_touch) {
+    rev;
+    Wait(400);
+    richtung = "nach_rechts";
+    goto suchen;
+   }
+  }
+  richtung = "nach_rechts";
+  goto suchen;
+ }
+ podest_r_h:
+ if(podest == "rechts_hinten") {
+  OnRev(rmot,r_rev);
+  OnRev(lmot,l_rev);
+  Wait(800);
+  off;
+  RotateMotor(lmot,l_rev,-1500);
+  off;
+  for(int i = 0; i < 80; i++) {
+   OnRev(rmot,r_rev);
+   OnRev(lmot,l_rev);
+   Wait(10);
+   if(greifarm_touch)   {
+    rev;
+    Wait(500);
+    break;               }
+  }
+  rev;
+    Wait(500);
+  OnFwd(lmot,l_pow);
+  OnFwd(rmot,r_pow);
+  Wait(1000);
+  until(touch1 && touch2) {
+   fwd;
+   if(touchO)
+    { dosegef = true; goto dose; }
+  }
+  rev;
+  Wait(900);
+  off;
+  RotateMotor(lmot,l_pow,1000);
+  off;
+  until(touch1 && touch2) {
+   fwd;
+   if(touchO)
+    { dosegef = true; goto dose; }
+  }
+  rev;
+  Wait(500);
+  off;
+   for(int i = 0;i<10 ;i++){
+ RotateMotor(lmot,100,97);
+ RotateMotor(rmot,-100,97);
+    }
+  for(int i = 0;i < 100; i++) {
+   rev;
+   if(greifarm_touch) {
+    rev;
+    Wait(800);
+    richtung = "nach_vorne";
+    goto suchen;
+   }
+   Wait(10);
+  }
+  rev;
+    Wait(800);
+  richtung = "nach_vorne";
+  goto suchen;
+ }
+ dose:
+ if(dosegef) {
+  rev;
+  Wait(1300);
+  off;
+  for(int i = 0;i<5 ;i++){
+ RotateMotor(lmot,100,207);
+ RotateMotor(rmot,-100,207);         }
+ off;
+  OnFwd(greifarm, 80);
+  Wait(2800);
+  off;
+  OnRev(rmot, r_rev - 40);
+  OnRev(lmot, l_rev -40);
+  Wait(5000);
+  off;
+  fwd;
+  Wait(500);
+  rev;
+  Wait(500);
+  off;
+  OnRev(greifarm, 120);
+  Wait(1500);
+  off;
+  fwd;
+  Wait(1500);
+  off;
+  OnFwd(greifarm, 80);
+  Wait(1500);
+  off;
+  OnRev(rmot, r_rev -40);
+  OnRev(lmot, l_rev -40);
+  OnRev(greifarm, 120);
+  Wait(900);
+  off;
+  for(int i = 0; i < 160; i++) {
+   OnRev(greifarm, 120);
+   Wait(10);
+   if(greifarm_touch)
+    break;
+  }
+  until(!(greifarm_touch)) {
+   OnFwd(greifarm, 80);
+   Wait(10);
+   off;
+  }
+  OnFwd(greifarm, 80);
+  Wait(250);
+  off;
+  OnFwd(rmot, r_pow);
+  OnRev(lmot, l_rev);
+  Wait(2150);
+  until(touch1 || touch2) {
+   OnFwd(rmot, r_pow +30);
+   OnFwd(lmot ,l_pow -10);
+  }
+  off;
+  goto podest_finden;
+ }
+ podest_finden:
+ if(dosegef) {
+  while(true) {
+   OnFwd(rmot, motpow-20);
+   OnFwd(lmot, motpow);
+   if(SENSOR_1 == 100) {
+    OnRev(OUT_AC, motpow);
+    Wait(100);
+    OnFwd(rmot, motpow);
+    OnRev(lmot, motpow);
+    Wait(200);
+   }
+   if(SENSOR_4 == 100) {
+    off;
+    Wait(120);
+    if(SENSOR_4 == 100) {
+     OnRev(OUT_AC, motpow);
+     Wait(100);
+     OnFwd(rmot, motpow);
+     OnRev(lmot, motpow);
+     Wait(200);
+    }
+   }
+   if(touchO || touchU) {
+    OnFwd(OUT_AC, motpow);
+    Wait(500);
+    if(touchU) {
+     fwd;
+     Wait(1000);
+     if(touchO)
+      goto dose;
+     goto fertig;
+    }
+    if(touchO)
+     goto dose;
+   }
+  } fertig:
+  fwd;
+  Wait(1000);
+  rev;
+  Wait(1500);
+  off;
+  /*for(int i = 0; i < 960; i++)
+   RotateMotorEx(OUT_AC, 80, 1, 100, true, false);*/
+  RotateMotor(lmot, -l_pow, 1020);
+  off;
+  RotateMotor(rmot, r_pow, 1020);
+  off;
+  rev;
+  Wait(4000);
+  off;
+  OnFwd(greifarm, 80);
+  Wait(2700);
+  off;
+  ende:
+  rev;
+  Wait(1000);
+  OnRev(greifarm, 80);
+  fwd;
+  Wait(2700);
+  off;
+  dosegef = false;
+ // goto suchen2;
+ }
+/* suchen2:
+ OnFwd(OUT_B, 80);
+ Wait(900);
+ for(int i = 0; i < 190; i++) {
+  OnRev(greifarm,80);
+  Wait(10);
+  if(greifarm_touch) {
+   break;
+  }
+ }
+ OnFwd(greifarm, 80);
+ Wait(900);
+ OnRev(greifarm, 80);
+ Wait(450);
+ Off(greifarm);
+ 
+ if(podest == "nD") {
+  OnFwd(lmot,l_pow);
+  OnRev(rmot,r_rev);
+  Wait(200);
+  off;
+  until(touch1 && touch2) {
+   fwd;
+   if(touchO) {
+    dosegef = true;
+    goto dose;
+   }
+  }
+  rev;
+  Wait(2000);
+  off;
+  RotateMotor(rmot,r_pow,1000);
+  off;
+  until(touch1 && touch2) {
+   fwd;
+   if(touchO) {
+    dosegef = true;
+    goto dose;
+   }
+  }
+  Wait(100);
+  off;
+  RotateMotor(lmot,-l_rev,500);
+  off;
+  RotateMotor(rmot,r_pow,490);
+  off;
+  for(int back = 0; back < 500; back ++) {
+   OnRev(rmot,r_rev);
+   OnRev(lmot,l_rev);
+   Wait(10);
+   if((greifarm_touch)){
+    rev;
+    Wait(400);
+    break;
+   }
+  }
+  rev;
+  Wait(400);
+  richtung = "nach_hinten";
+  goto suchen;
+ }
+ if(podest == "rechts_vorne") {
+  //
+  for(int i = 0; i < 5; i++) {
+   RotateMotor(lmot,-l_rev,200);
+   off;
+   RotateMotor(rmot,r_pow,200);
+   off;
+  }
+  until(touchU)
+   fwd;
+  OnRev(rmot,r_rev);
+  OnRev(lmot,l_rev);
+  Wait(800);
+  off;
+  RotateMotor(lmot,l_rev,-1500);
+  off;
+  for(int i = 0; i < 80; i++) {
+   OnRev(rmot,r_rev);
+   OnRev(lmot,l_rev);
+   Wait(10);
+   if(greifarm_touch)   {
+    rev;
+    Wait(500);
+    break;       }
+  }
+  rev;
+    Wait(500);
+  OnFwd(lmot,l_pow);
+  OnFwd(rmot,r_pow);
+  Wait(1000);
+  until(touch1 && touch2) {
+   fwd;
+   if(touchO)
+    { dosegef = true; goto dose; }
+  }
+  OnRev(rmot,r_rev);
+  OnRev(lmot,l_rev);
+  Wait(3000);
+  off;
+  RotateMotor(rmot,r_pow,1000);
+  off;
+  until(touch1 && touch2) {
+   fwd;
+   if(touchO)
+    { dosegef = true; goto dose; }
+  }
+  rev;
+  Wait(1000);
+  off;
+  RotateMotor(lmot,l_pow,1000);
+  off;
+  until(touch1 && touch2) {
+   fwd;
+   if(touchO)
+    { dosegef = true; goto dose; }
+  }
+  rev;
+  Wait(1000);
+  off;
+  RotateMotor(lmot,l_pow,1000);
+  off;
+  for(int i = 0;i<100; i++) {
+   rev;
+   Wait(10);
+   if(greifarm_touch) {
+    rev;
+    Wait(400);
+    richtung = "nach_rechts";
+    goto suchen;
+   }
+  }
+  richtung = "nach_rechts";
+  goto suchen;
+ }           */
+
+}

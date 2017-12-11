@@ -1,0 +1,31 @@
+int x = 0;
+
+task main()
+{
+  SetSensorLight(S3);
+  
+  go:
+  while(true)
+  {
+   if(x == 0)
+   OnFwd(OUT_AB, 100);
+   if(x == 1)
+   OnRev(OUT_AB, 100);
+   
+   if(SENSOR_3 == 100)
+   {
+    if(x == 0)
+    {
+     x = 1;
+     Wait(500);
+     goto go;
+    }
+    if(x == 1)
+    {
+     x = 0;
+     Wait(500);
+     goto go;
+    }
+   }
+  }
+}

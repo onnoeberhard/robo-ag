@@ -1,0 +1,116 @@
+#define linkskurve OnFwd(OUT_C); OnRev(OUT_A);
+#define rechtskurve OnFwd(OUT_A); OnRev(OUT_C);
+#define geradeaus OnFwd(OUT_A+OUT_C);
+#define ruckwarts OnRev(OUT_A+OUT_C);
+#define schwarz1 47
+#define schwarz3 41
+#define weiss1 67
+#define weiss2 65
+#define silber1 75
+#define silber2 60
+#define silber3 70
+#define stopp Off(OUT_A+OUT_B);
+#define schwarzlinks (SENSOR_1> schwarz1-4) && (SENSOR_1<schwarz1+4)
+#define schwarzrechts (SENSOR_3 > schwarz3-4) && (SENSOR_3 <schwarz3+4)
+
+task main()
+{
+
+int stein=0;
+
+SetSensor(SENSOR_1, SENSOR_LIGHT);
+SetSensor(SENSOR_2, SENSOR_LIGHT);
+SetSensor(SENSOR_3, SENSOR_LIGHT);
+
+
+  while(true)
+  {
+    geradeaus;
+
+    if((SENSOR_1 > schwarz1-4) && (SENSOR_1<schwarz1+4))
+    {
+      linkskurve;
+      Wait(60);
+    }
+    if((SENSOR_3 > schwarz3-4) && (SENSOR_3 <schwarz3+4))
+    {
+      rechtskurve;
+      Wait(60);
+    }
+    if((SENSOR_1 == 100) || (SENSOR_3 == 100))
+    {
+      geradeaus;
+      Wait (10);
+    }
+    if((SENSOR_1 == 100) && (SENSOR_3 == 100))
+    {
+      stein=stein+1;
+      Wait(39);
+      ruckwarts;
+      Wait(200);
+      rechtskurve;
+      Wait(110);
+      geradeaus;
+      Wait(220);
+      linkskurve;
+      Wait(140);
+      geradeaus;
+      Wait(300);
+      linkskurve;
+      Wait(140);
+    }
+    if(SENSOR_1 == 100)  // korrigieren wenn wand
+    {
+      rechtskurve;
+      Wait(35);
+    }
+
+    if(SENSOR_3 == 100)   // korrigieren wenn wand
+    {
+      linkskurve;
+      Wait(35);
+    }
+
+    if((SENSOR_1 == 100) && (SENSOR_3 == 100))
+    {
+      stein==3;
+      Wait(90);
+    }
+
+
+
+    if((SENSOR_1 > silber1-3) && (SENSOR_1 < silber1+3) || (SENSOR_3 > silber3-3) && (SENSOR_3 < silber3+3))
+    {
+      PlaySound(3); Wait(100);
+        while(true)
+        {
+          geradeaus;
+
+          if((SENSOR_1 == 100) && (SENSOR_3 == 100))
+          {
+            rechtskurve;
+            Wait(80);
+          }
+          if(SENSOR_2 < silber2)
+          while(true)
+          {
+         {
+            geradeaus;
+            Wait(1300);
+         }
+         if (schwarzrechts || schwarzlinks)
+         {
+           stopp
+         }
+
+         else
+         {
+            rechtskurve;
+            Wait(100);
+         }
+          }
+          }
+   }
+
+ }
+}

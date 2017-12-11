@@ -1,0 +1,355 @@
+//-----Linie_erkennen-Stein-Wand-Schräge-Rote_Zone------------------------------Ja
+//----------------------------1.1_1.2_3.2_3.1--------------------------------------------------Nein
+//------------------------------------------------------------------------------Anfang
+// LICHT PORT 1 :  WEIß = 45 - 55 520
+// LICHT PORT 2 :  WEIß = 63 - 73 68
+// LICHT PORT 3 :  WEIß = 50 - 60 470
+// LICHT PORT 1.1 :  SCHWARZ  =  35 - 45 585
+// LICHT PORT 1.2 :  SCHWARZ  =  35 - 45 580
+// LICHT PORT 2 :  SCHWARZ  =  45 - 55 50
+// LICHT PORT 3.2 :  SCHWARZ  =  40 - 50 550
+// LICHT PORT 3.1 :  SCHWARZ  =  40 - 50 565
+// LICHT PORT 1 :  SILBER = 37 - 45  41
+// LICHT PORT 2 :  SILBER = 57 - 69  63
+// LICHT PORT 3 :  SILBER = 44 - 52  48
+// LICHT PORT 2 :  DOSE WEISS = 88 - 92  90
+// LICHT PORT 2 :  DOSE SCHWARZ = 690 - 73  71
+// LICHTWERTE = Silber > Weiß > Grün > Schwarz
+
+#define weiss1 SENSOR_1 > 520-25 && SENSOR_1 < 520+25
+#define weiss3 SENSOR_3 > 470-25 && SENSOR_3 < 470+25
+#define silber1 SENSOR_1 > 37 && SENSOR_1 < 45
+#define silber3 SENSOR_3 > 44 && SENSOR_3 < 52
+#define schwarz11 SENSOR_1 > 585-20 && SENSOR_1 < 585+20
+#define schwarz12 SENSOR_1 > 580-20 && SENSOR_1 < 580+20
+#define schwarz32 SENSOR_3 > 550-20 && SENSOR_3 < 550+20
+#define schwarz31 SENSOR_3 > 565-20 && SENSOR_3 < 565+20
+
+task main()
+{
+  SetSensor(SENSOR_1, SENSOR_LIGHT);
+  SetSensor(SENSOR_2, SENSOR_LIGHT);
+  SetSensor(SENSOR_3, SENSOR_LIGHT);
+  SetSensorMode(SENSOR_1, SENSOR_MODE_RAW); // raw mode
+  SetSensorMode(SENSOR_2, SENSOR_MODE_PERCENT); // raw mode
+  SetSensorMode(SENSOR_3, SENSOR_MODE_RAW); // raw mode
+  SetPower(OUT_AB, 1);
+
+  ClearTimer(0);
+  int wz = 0;                        // U N B E D I N G T  INT WZ = 0 ! 0 0 0 0 0 0 0 0 0 0
+  //int sz = 0;                        // U N B E D I N G T  INT SZ = 0 ! 0 0 0 0 0 0 0 0 0 0
+//------------------------------------------------------------------------------Programmstart
+  while(true)
+  {
+    OnFwd(OUT_AB);
+
+//------------------------------------------------------------------------------Linie erkennen Sensor 1
+    if(schwarz11 || schwarz12)
+    {
+      while(schwarz11 || schwarz12)
+      {
+       OnFwd(OUT_B);
+       OnRev(OUT_A);
+      }
+      OnFwd(OUT_B);
+      OnRev(OUT_A);
+      Wait(8);
+      //ClearTimer(0);
+    }
+//------------------------------------------------------------------------------Linie erkennen Sensor 3
+    if(schwarz31 || schwarz32)
+    {
+      while(schwarz31 || schwarz32)
+      {
+       OnFwd(OUT_A);
+       OnRev(OUT_B);
+      }
+      OnFwd(OUT_A);
+      OnRev(OUT_B);
+      Wait(8);
+      //ClearTimer(0);
+    }
+
+//------------------------------------------------------------------------------Stein und Wand
+          if(SENSOR_1 < 100)
+          {
+           OnFwd(OUT_AB);
+           Wait(30);
+           if(SENSOR_1 < 100 && SENSOR_3 < 100)
+           {
+             OnRev(OUT_AB);
+             Wait(50);
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(60);
+             OnFwd(OUT_AB);
+             Wait(100);
+             while(weiss1 && weiss3)
+             {
+              OnFwd(OUT_AB);
+              Wait(40);
+              OnRev(OUT_A);
+              OnFwd(OUT_B);
+              Wait(15);
+             }
+             while(weiss1 && weiss3)
+             {
+              OnFwd(OUT_A);
+              OnRev(OUT_B);
+              Wait(10);
+             }
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(20);
+             OnFwd(OUT_AB);
+             Wait(10);
+             ClearTimer(0);
+           }
+             else
+             {
+              OnRev(OUT_A);
+              OnRev(OUT_B);
+              Wait(20);
+              OnFwd(OUT_A);
+              OnRev(OUT_B);
+              Wait(30);
+             }
+          }
+
+          if(SENSOR_3 < 100)
+          {
+           OnFwd(OUT_AB);
+           Wait(30);
+           if(SENSOR_1 < 100 && SENSOR_3 < 100)
+           {
+             OnRev(OUT_AB);
+             Wait(50);
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(60);
+             OnFwd(OUT_AB);
+             Wait(100);
+             while(weiss1 && weiss3)
+             {
+              OnFwd(OUT_AB);
+              Wait(40);
+              OnRev(OUT_A);
+              OnFwd(OUT_B);
+              Wait(15);
+             }
+             while(weiss1 && weiss3)
+             {
+              OnFwd(OUT_A);
+              OnRev(OUT_B);
+              Wait(10);
+             }
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(20);
+             OnFwd(OUT_AB);
+             Wait(10);
+             ClearTimer(0);
+           }
+           else
+           {
+            OnRev(OUT_AB);
+            Wait(20);
+            OnFwd(OUT_B);
+            OnRev(OUT_A);
+            Wait(30);
+           }
+          }
+
+          /*if(weiss1 && weiss3 && wz == 0 && Timer(0) > 50)
+          {
+           wz = 1;
+          }*/
+          /*if((schwarz1 || schwarz3) && wz == 1 && sz == 0)
+          {
+           sz = 1;
+           //PlaySound(2);
+          }
+
+          if(schwarz3 && wz == 1)
+          {
+           OnFwd(OUT_A);
+           OnRev(OUT_B);
+           Wait(35);
+          }*//*
+          if(SENSOR_1 == 100 && wz == 1)
+          {
+            OnFwd(OUT_A);
+            OnRev(OUT_B);
+            Wait(20);
+          }
+          if(SENSOR_3 == 100 && wz == 1)
+          {
+            OnFwd(OUT_B);
+            OnRev(OUT_A);
+            Wait(20);
+          }
+
+
+//------------------------------------------------------------------------------Rote Zone (wenn Silber gefunden(Linie))
+      if(silber1 && silber3 && wz == 1)
+      {
+       On(OUT_C);
+       Wait(100);
+       Off(OUT_C);
+
+       OnFwd(OUT_AB);
+       Wait(40);
+       OnFwd(OUT_A);
+       OnRev(OUT_B);
+       Wait(140);
+
+       while(true)
+       {
+        OnFwd(OUT_AB);
+//------------------------------------------------------------------------------Dose und Wand
+        if(SENSOR_3 == 100)
+        {
+          OnFwd(OUT_A);
+          OnRev(OUT_B);
+          Wait(30);
+          OnFwd(OUT_AB);
+          Wait(100);
+
+         if(SENSOR_2 > 86)
+         {
+            On(OUT_C);
+            Wait(100);
+            Off(OUT_C);
+            OnFwd(OUT_AB);
+            Wait(1000);
+            while(SENSOR_2 > 86)
+            {
+              OnFwd(OUT_A);
+              OnRev(OUT_B);
+              Wait(150);
+              OnFwd(OUT_AB);
+              Wait(1000);
+            }
+            if(schwarz1)
+            {
+             OnFwd(OUT_B);
+             OnRev(OUT_A);
+             Wait(135);
+             OnFwd(OUT_AB);
+             Wait(150);
+            }
+            if(schwarz3)
+            {
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(135);
+             OnFwd(OUT_AB);
+             Wait(150);
+            }
+            if(SENSOR_2 < 80 && (schwarz1 || SENSOR_1 == 100) && (schwarz3 || SENSOR_3 == 100))
+            {
+              Off(OUT_AB);
+              while(true)
+              {
+               endee:
+               On(OUT_C);
+               PlaySound(SOUND_UP);
+               goto endee;
+              }
+            }
+         }
+         else
+         {
+          OnRev(OUT_AB);
+          Wait(20);
+          //links
+          OnFwd(OUT_B);
+          OnRev(OUT_A);
+          Wait(270);
+         }
+        }
+
+        if(SENSOR_1 == 100)
+        {
+          OnFwd(OUT_B);
+          OnRev(OUT_A);
+          Wait(30);
+          OnFwd(OUT_AB);
+          Wait(100);
+
+         if(SENSOR_2 > 86)
+         {
+            On(OUT_C);
+            Wait(100);
+            Off(OUT_C);
+            OnFwd(OUT_AB);
+            Wait(1000);
+            while(SENSOR_2 > 86)
+            {
+              OnFwd(OUT_A);
+              OnRev(OUT_B);
+              Wait(150);
+              OnFwd(OUT_AB);
+              Wait(1000);
+            }
+            if(schwarz1)
+            {
+             OnFwd(OUT_B);
+             OnRev(OUT_A);
+             Wait(135);
+             OnFwd(OUT_AB);
+             Wait(150);
+            }
+            if(schwarz3)
+            {
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(135);
+             OnFwd(OUT_AB);
+             Wait(150);
+            }
+            if(SENSOR_2 < 80 && (schwarz1 || SENSOR_1 == 100) && (schwarz3 || SENSOR_3 == 100))
+            {
+             Off(OUT_AB);
+             while(true)
+             {
+              ende:
+              On(OUT_C);
+              PlaySound(SOUND_UP);
+              goto ende;
+             }
+            }
+         }
+         else
+         {
+          OnRev(OUT_AB);
+          Wait(20);
+          //rechts
+          OnFwd(OUT_A);
+          OnRev(OUT_B);
+          Wait(270);
+         }
+       }
+       //------------------------------------------------------------------------------Silber gefunden
+       if(schwarz1 || schwarz3)
+       {
+         OnRev(OUT_AB);
+         Wait(150);
+         OnFwd(OUT_B);
+         OnRev(OUT_A);
+         Wait(150);
+       }
+       if(silber1 && silber3)
+       {
+        OnRev(OUT_AB);
+        Wait(150);
+        OnFwd(OUT_B);
+        OnRev(OUT_A);
+        Wait(150);                                         //Kurve links-----100
+       }
+       }
+       }*/
+     }
+
+}
+//------------------------------------------------------------------------------Ende

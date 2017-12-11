@@ -1,0 +1,139 @@
+
+
+#define __NOTETIME   10
+#define __WAITTIME   12
+
+ task main()
+{
+SetSensor(SENSOR_1,SENSOR_LIGHT);
+SetSensor(SENSOR_3,SENSOR_LIGHT);
+SetSensor(SENSOR_2,SENSOR_LIGHT);
+OnFwd(OUT_A+OUT_B);
+   while(1==1)
+     {
+     // Beginn Linie fahren
+     if (SENSOR_1 >=37 && SENSOR_1 <=43)
+     {
+
+        OnFwd(OUT_B);
+        OnRev(OUT_A);
+        Wait(18);
+
+
+      }
+     else
+     {
+        OnFwd(OUT_A+OUT_B);
+     }
+
+     if (SENSOR_3 >=34 && SENSOR_3 <=45)
+     {
+        OnFwd(OUT_A);
+        OnRev(OUT_B);
+        Wait(18);
+     }
+     else
+     {
+        OnFwd(OUT_A+OUT_B);
+     }
+     // Ende Linie fahren
+     
+
+
+     // Beginn Grün
+      
+      if/*(((SENSOR_1 >=45 && SENSOR_1 <=49 && SENSOR_2 >=46 && SENSOR_2 <=52 )||(SENSOR_2 >=46 && SENSOR_2 <=52 && SENSOR_3 >=44 && SENSOR_3 <=47))||(*/(SENSOR_1 >=44 && SENSOR_1 <=45 && SENSOR_3 >=41 && SENSOR_3 <=43 )//))  // Grün gefunden
+      {
+       if(Timer(1)>150)
+       {
+      Off(OUT_A+OUT_B);
+      Wait(200);
+      PlayTone(262,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(294,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(330,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(262,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      OnFwd(OUT_C);
+      Wait(200);
+      ClearTimer(1);
+       }
+
+       }
+      else
+      {
+       Off(OUT_C);
+      }
+      
+      // Ende grün
+
+      // Beginn silber
+
+      if((SENSOR_2 >58 && SENSOR_3 >54)||(SENSOR_1 >=58 && SENSOR_2 >=58)||(SENSOR_1 >=54 )) // Silber gefunden
+      {
+       if(Timer(1)>150)
+       {
+         Off(OUT_A+OUT_B);
+         PlayTone(440,4*__NOTETIME);
+         PlayTone(659,4*__NOTETIME);
+         Wait(4*__WAITTIME);
+         PlayTone(494,4*__NOTETIME);
+         Wait(4*__WAITTIME);
+         OnFwd(OUT_C);
+         Wait(20);
+         ClearTimer(1);
+       }
+      }
+       else
+      {
+       Off(OUT_C);
+      }
+      // Ende silber
+
+
+      //Beginn Stein
+
+      if (SENSOR_1 > 99 || SENSOR_3 > 99 )
+      {
+       OnRev(OUT_A+OUT_B);
+       Wait(100);
+       OnFwd(OUT_B);
+       Wait(100);
+       OnFwd(OUT_A+OUT_B);
+       Wait(250);
+       Off(OUT_B+OUT_A);
+       OnFwd(OUT_A);
+       Wait(400);
+       OnFwd(OUT_A+OUT_B);
+       Wait(75);
+      }
+      
+
+
+       if ((SENSOR_1 >=37 && SENSOR_1 <=43)||(SENSOR_3 >=34 && SENSOR_3 <=41))//Rote Zone
+       {
+        ClearTimer(2);
+        Timer((2)>200);
+        if(Timer(2)>200)
+        {
+          OnRev(OUT_A+OUT_B);
+          Wait(200);
+          OnRev(OUT_B);
+          Wait(150);
+          OnFwd(OUT_A);
+          Wait(150);
+
+       }
+       }
+
+
+
+
+   }
+ }
+
+
+
+

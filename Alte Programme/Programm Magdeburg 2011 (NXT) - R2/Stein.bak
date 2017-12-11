@@ -1,0 +1,123 @@
+#define schwarz1 SENSOR_1 > 38-15 && SENSOR_1 < 38+15
+#define schwarz3 SENSOR_2 > 38-15 && SENSOR_2 < 38+15
+#define weiss1 SENSOR_1 > 65-5 && SENSOR_1 < 65+5
+#define weiss3 SENSOR_2 > 64-5 && SENSOR_2 < 64+5
+
+#define touch1 SENSOR_1 == 100
+#define touch3 SENSOR_2 == 100
+
+int motpow = 100;
+
+task main()
+{
+  SetSensorLight(S1);
+  SetSensorLight(S2);
+
+//------------------------------------------------------------------------------Programmstart
+  while(true)
+  {
+    OnFwd(OUT_AB, motpow);
+//------------------------------------------------------------------------------Stein und Wand(Wenn Batterie Normal)
+    if(touch1)
+    {
+     OnFwd(OUT_AB, motpow);
+     Wait(1000);
+     if(SENSOR_1 == 100 && SENSOR_2 == 100)
+     {
+      PlayTone(523,1200);
+      OnRev(OUT_AB, motpow);
+      Wait(1000);
+      OnFwd(OUT_A, motpow);
+      OnRev(OUT_B, motpow);
+      Wait(1000);
+      OnFwd(OUT_AB, motpow);
+      Wait(900);
+      steinroutine2:
+      while(weiss1 && weiss3)
+      {
+       OnFwd(OUT_AB, motpow);
+       Wait(360);
+       if(schwarz1 || schwarz3)
+       goto sw1;
+       OnRev(OUT_A, motpow);
+       OnFwd(OUT_B, motpow);
+       Wait(200);
+       if(schwarz1 || schwarz3)
+       goto sw1;
+      }
+      if(touch1 || touch3)
+      {
+       OnFwd(OUT_AB, motpow);
+       Wait(1000);
+       goto steinroutine2;
+      }
+      sw1:
+      OnFwd(OUT_AB, motpow);
+      Wait(100);
+      OnFwd(OUT_A, motpow);
+      OnRev(OUT_B, motpow);
+      Wait(400);
+     // OnFwd(OUT_AB, motpow);
+     }
+     else
+     {
+      OnRev(OUT_AB, motpow);
+      Wait(500);
+      OnFwd(OUT_A, motpow);
+      OnRev(OUT_B, motpow);
+      Wait(400);
+     }
+    }
+
+    if(touch3)
+    {
+     OnFwd(OUT_AB, motpow);
+     Wait(1000);
+     if(SENSOR_1 == 100 && SENSOR_2 == 100)
+     {
+      PlayTone(523,1200);
+      OnRev(OUT_AB, motpow);
+      Wait(1000);
+      OnFwd(OUT_A, motpow);
+      OnRev(OUT_B, motpow);
+      Wait(1000);
+      OnFwd(OUT_AB, motpow);
+      Wait(900);
+      steinroutine1:
+      while(weiss1 && weiss3)
+      {
+       OnFwd(OUT_AB, motpow);
+       Wait(360);
+       if(schwarz1 || schwarz3)
+       goto sw2;
+       OnRev(OUT_A, motpow);
+       OnFwd(OUT_B, motpow);
+       Wait(200);
+       if(schwarz1 || schwarz3)
+       goto sw2;
+      }
+      if(touch1 || touch3)
+      {
+       OnFwd(OUT_AB, motpow);
+       Wait(1000);
+       goto steinroutine1;
+      }
+      sw2:
+      OnFwd(OUT_AB, motpow);
+      Wait(100);
+      OnFwd(OUT_A, motpow);
+      OnRev(OUT_B, motpow);
+      Wait(400);
+     // OnFwd(OUT_AB, motpow);
+     }
+     else
+     {
+      OnRev(OUT_AB, motpow);
+      Wait(500);
+      OnFwd(OUT_B, motpow);
+      OnRev(OUT_A, motpow);
+      Wait(400);
+     }
+    }
+  }
+}

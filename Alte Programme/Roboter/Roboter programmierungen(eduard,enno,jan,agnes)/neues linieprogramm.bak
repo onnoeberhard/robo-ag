@@ -1,0 +1,264 @@
+
+
+#define __NOTETIME   10
+#define __WAITTIME   12                     // Team: FireWave
+
+
+
+
+ task main()
+{
+SetPower(OUT_A,7);
+SetPower(OUT_B,5);
+SetSensor(SENSOR_1,SENSOR_LIGHT);
+SetSensor(SENSOR_3,SENSOR_LIGHT);
+SetSensor(SENSOR_2,SENSOR_LIGHT);
+
+
+
+
+
+   while(true)
+
+     {
+     // Beginn Linie fahren
+       if (SENSOR_1 >=44 && SENSOR_1 <=47)
+       {
+       OnRev(OUT_A+OUT_B);
+       Wait(5);
+       OnFwd(OUT_A);
+       OnRev(OUT_B);
+       Wait(10);
+       }
+
+       if(SENSOR_3 >=44 && SENSOR_3 <47)
+           {
+           OnRev(OUT_A+OUT_B);
+           Wait(5);
+           OnFwd(OUT_B);
+           OnRev(OUT_A);
+           Wait(10);
+           }
+
+
+
+
+     if ((SENSOR_1 >=44 && SENSOR_1 <=47)&&(SENSOR_2>36&&SENSOR_2<40))
+       {
+      OnFwd(OUT_B);
+      OnRev(OUT_A);
+      until (SENSOR_3 >=44 && SENSOR_3 <47);
+      Off(OUT_A+OUT_B);
+      Wait(10);
+      OnFwd(OUT_A);
+      OnRev(OUT_B);
+      Wait(20);
+            }
+     else
+     {
+        OnFwd(OUT_A+OUT_B);
+     }
+
+     if ((SENSOR_3 >=44 && SENSOR_3 <47)&&(SENSOR_2>36&&SENSOR_2<40))
+     {
+      OnFwd(OUT_A);
+      OnRev(OUT_B);
+      until(SENSOR_1 >=44 && SENSOR_1 <=47);
+      Off(OUT_A+OUT_B);
+      Wait(10);
+      OnFwd(OUT_B);
+      OnRev(OUT_A);
+      Wait(20);
+       }
+     else
+     {
+        OnFwd(OUT_A+OUT_B);
+     }
+     // Ende Linie fahren
+     
+     // Beginn Grün
+      
+      if((SENSOR_1 >=51 && SENSOR_1 <=53 ) && (SENSOR_2 >=45)  && (SENSOR_2 <=48) || (SENSOR_2 >=45) && (SENSOR_2 <=48) && (SENSOR_3 >=49) && (SENSOR_3 <=53  ))  // Grün gefunden
+      {
+       if(Timer(1)>150)
+       {
+      Off(OUT_A+OUT_B);
+      OnFwd(OUT_C);
+      Wait(150);
+      PlayTone(262,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(294,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(330,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(262,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      OnRev(OUT_A+OUT_B);
+      Wait(10);
+      ClearTimer(1);
+       }
+
+       }
+      else
+      {
+       Off(OUT_C);
+      }
+      
+      // Ende grün
+
+      // Beginn silber
+
+      if((SENSOR_2 > 64 && SENSOR_3 > 63)||(SENSOR_1 >72 && SENSOR_2 > 64 )) // Silber gefunden
+      {
+       if(Timer(3)>150)
+       {
+         Off(OUT_A+OUT_B);
+         OnFwd(OUT_C);
+         Wait(150);
+         PlayTone(440,4*__NOTETIME);
+         PlayTone(659,4*__NOTETIME);
+         Wait(4*__WAITTIME);
+         PlayTone(494,4*__NOTETIME);
+         Wait(4*__WAITTIME);
+         OnFwd(OUT_C);
+         Wait(200);
+         OnRev(OUT_A+OUT_B);
+         Wait(10);
+         ClearTimer(3);
+       }
+      }
+       else
+      {
+       Off(OUT_C);
+      }
+
+
+      //Beginn Stein
+
+      if (SENSOR_2 > 99)
+      {
+       OnRev(OUT_A+OUT_B);
+       Wait(30);
+       OnFwd(OUT_A);
+       Wait(90);
+       OnRev(OUT_B);
+       Wait(90);
+       OnFwd(OUT_A+OUT_B);
+       Wait(275);
+       OnRev(OUT_A);
+       Wait(80);
+       OnFwd(OUT_B);
+       Wait(80);
+       OnFwd(OUT_A+OUT_B);
+       Wait(325);
+       OnFwd(OUT_B);
+       Wait(170);
+       OnRev(OUT_A);
+       Wait(170);
+       OnFwd(OUT_A+OUT_B);
+       Wait(206);
+       OnFwd(OUT_A);
+       OnRev(OUT_B);
+       Wait(75);
+
+
+     /*  if((SENSOR_1>56&&SENSOR_1<62)||(SENSOR_2>50&&SENSOR_2<55)||(SENSOR_3>53&&SENSOR_3<57))
+       {
+       OnFwd(OUT_A+OUT_B);
+       Wait(30);
+       }
+       //das gleiche für schwarz
+       if (SENSOR_1 >=42 && SENSOR_1 <=46||SENSOR_3 >=44 && SENSOR_3 <=48)
+          {
+          OnFwd(OUT_A);
+          OnRev(OUT_B);
+          Wait(230);
+          }
+          
+          
+       if((SENSOR_1>56&&SENSOR_1<62)||(SENSOR_2>50&&SENSOR_2<55)||(SENSOR_3>53&&SENSOR_3<57))
+       {
+       OnFwd(OUT_A+OUT_B);
+       Wait(30);
+       }
+       //das gleiche für schwarz
+        if (SENSOR_1 >=42 && SENSOR_1 <=46||SENSOR_3 >=44 && SENSOR_3 <=48)
+          {
+          OnFwd(OUT_A);
+          OnRev(OUT_B);
+          Wait(230);
+          }
+
+       
+       if((SENSOR_1>56&&SENSOR_1<62)||(SENSOR_2>50&&SENSOR_2<55)||(SENSOR_3>53&&SENSOR_3<57))
+       {
+       OnFwd(OUT_A+OUT_B);
+       Wait(30);
+       }
+       //das gleiche für schwarz
+
+       if (SENSOR_1 >=42 && SENSOR_1 <=46||SENSOR_3 >=44 && SENSOR_3 <=48)
+          {
+          OnFwd(OUT_A);
+          OnRev(OUT_B);
+          Wait(50);
+          }
+
+       if((SENSOR_1>56&&SENSOR_1<62)||(SENSOR_2>50&&SENSOR_2<55)||(SENSOR_3>53&&SENSOR_3<57))
+       {
+       OnFwd(OUT_A+OUT_B);
+       Wait(30);
+       }
+
+       //das gleiche für schwarz
+
+       if (SENSOR_1 >=42 && SENSOR_1 <=46||SENSOR_3 >=44 && SENSOR_3 <=48)
+          {
+          OnFwd(OUT_A);
+          OnRev(OUT_B);
+          Wait(50);
+          }
+
+       
+       
+       if((SENSOR_1>56&&SENSOR_1<62)||(SENSOR_2>50&&SENSOR_2<55)||(SENSOR_3>53&&SENSOR_3<57))
+       {
+       OnFwd(OUT_A+OUT_B);
+       Wait(30);
+       }
+       //das gleiche für schwarz
+
+
+       if (SENSOR_1 >=42 && SENSOR_1 <=46||SENSOR_3 >=44 && SENSOR_3 <=48)
+          {
+          OnFwd(OUT_A);
+          OnRev(OUT_B);
+          Wait(50);
+          }   */
+
+       }
+
+
+
+                     
+    if(SENSOR_1 >99)     //Rote Zone Sensor
+     {
+     OnRev(OUT_A+OUT_B);
+     Wait(20);
+     OnRev(OUT_A);
+     OnFwd(OUT_B);
+     Wait(200);
+
+
+     }
+        else
+      {
+        OnFwd(OUT_A+OUT_B);
+      }
+
+ }
+ }
+
+
+
+

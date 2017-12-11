@@ -1,0 +1,940 @@
+#define schwarz1 (SENSOR_1 > sw1-pm && SENSOR_1 < sw1+pm)
+#define schwarz2 (SENSOR_2 > sw2-pm && SENSOR_2 < sw2+pm)
+#define schwarz3 (SENSOR_3 > sw3-pm && SENSOR_3 < sw3+pm)
+#define schwarz4 (SENSOR_4 > sw4-pm && SENSOR_4 < sw4+pm)
+#define touch1 (SENSOR_1 == 100)
+#define touch2 (SENSOR_2 == 100)
+#define touch3 (SENSOR_3 == 100)
+#define touch4 (SENSOR_4 == 100)
+#define tdose (touch4 && (touch1 || touch2) && (touch3 || (touch1 && touch2)))
+#define tpodest (touch3 && !(touch4 || touch1 || touch2))
+
+#define DoThisBeforeTheProgramStarts
+
+//  _____________________________________________                                                     _
+// |        /       \        |                   |                   _         _               _     |V|        _        _
+// |  B   /           \   A  |     $   ;--;      |                  |L|     _/__\_          _/__\__          _/__\_     |R|
+// |    /               \    |--   $  -;   ;;    |                  __..__ |Touch | __..__ |2*Touch| __..__ |Touch | __..__
+// |  /                   \  |     $         ;   |                 |Light ||      ||Light ||2Stück ||Light ||      ||Light |
+// |/                       \|        <A-    ;   |                 | weiß || nxt  || rot  ||2*nxt/o|| rot  || nxt  || weiß |
+// |                         |     ;--(S)--;;;   |                 | nxt  ||  P1  || nxt  || P3;P4 || nxt  ||  P2  || nxt  |
+// |                         |    ;   <B-        |                 |  P3  ||__t1__||  P1  ||_t3;t4_||  P2  ||__t2__||  P4  |
+// |                         |     ;             |                 |__3___|        |__1___|         |__2___|        |__4___|
+// |            (D)          |    ;      2.R.    |                         _______         _______          _______
+// |                         |   ;               |                        | motor |       | motor |        | motor |
+// |      R.Z.              /|  ;                |                        | A - L |       |C - arm|        | B - R |
+// |                      /  |   ;----;          |                        '''''''''       '''''''''        '''''''''
+// |                    /    |        ;          |               *************************************
+// |                  /   C  |        ;-----;    |               *              ROBOTOP              *          +-----------------+
+// |........._______/________|__________    ;    |               *           ONNO EBERHARD           *          | © 2013, ROBOTOP |
+// |    ;                                   ;    |               *          NICOLAS VÖLKSEN          *          +-----------------+
+// |    ;              RAMPE                ;    |               *************************************
+// |    ;----                            ---;    |
+// |_____________________________________________|
+//
+// (D)=Dose ++ (S)=Stein ++ [_|]=Wand ++ [;-]=Schwarze Linie
+// [$]=Bumper ++ [..]=Silberne Linie
+
+// --- Konstanten
+int sw1 = 30, sw2 = 27, sw3 = 43, sw4 = 37;   //[s]ch[w]arz
+int pm = 10;         //[p]lus [m]inus
+int motpow  = 89;    //[mot]or [pow]er
+string slr  = "A" ;  //[s]tein [l]inks [r]echts --- A/R = rechtsrum | B/L = linksrum
+string rzse = "C" ;  //[r]ote [z]one [s]chwarze [e]cke --- siehe Parcour oben
+// --- Variablen
+// Bools
+bool wzm   = true;  //[w]eiße [z]one [m]essen
+bool wz    = false; //[w]eiße [z]one
+bool rz    = false; //[r]ote [z]one
+bool ssr   = false; //[s]tein [s]chwarz [r]echts
+bool d     = false; //[d]ose
+bool rzb   = true;  //[r]ote [z]one [b]eginnungswand
+bool pause = false; //[pause]
+bool srzm  = true;  //[s]chwarz [r]ote [z]one [m]essen
+// Integers, Strings
+int Timer1     = 0; //Timer für Rampe Messen (rampe auch [w]eiße [z]one) +++ bei Platform oben in Rote Zone reinfahren +++ für Schwarze Ecke/Podest (in Rote Zone) suchen
+int Timer2     = 0; //Timer für Allgemeine FAIL-Verhinderung (nicht in der Roten Zone)
+int Timer3     = 0; //Timer für Stein (bei Erkennung der schwarzen Linie) +++ to zurücksetzen (zur Erkennung von Plattform oben)
+int Timer4     = 0; //Timer für Stein erkennung bei eigentlicher Wand (tu zurücksetzen)
+int motpowsave = 0; //[mot]or [pow]er [save]
+int tu         = 0; //[t]ouch [u]nten {s.Timer4}
+int to         = 0; //[t]ouch [o]ben {s.Timer3}
+int tolr       = 0; //[t]ouch [o]ben [l]inks [r]einkommen
+int lr         = 0; //[l]inks [r]echts
+int lrc        = 0; //[l]inks [r]echts [c]ounter
+int zdsr       = 0; //[z]ahl [d]osen [s]uch [r]outine
+int sidrz      = 0; //[s]chwarz [i]n [d]er [r]oten [z]one
+
+task timer() {
+  while(true) {
+    Timer1++;
+    Wait(1);
+  }
+}
+task timer2() {
+  while(true) {
+   Timer2++;
+   Wait(10);
+  }
+}
+task timer3() {
+  while(true) {
+   Timer3++;
+   Wait(400);
+   to = 0;
+   ClearScreen();
+  }
+}
+task timer4() {
+  while(true) {
+   Timer4++;
+   Wait(750);
+   tu = 0;
+  }
+}
+task lcd() {
+  ClearScreen();
+  while(true) {
+   TextOut(5, LCD_LINE1, "ROBOTOP");
+   TextOut(0, LCD_LINE2, "S-1: " + NumToStr(SENSOR_1));
+   TextOut(0, LCD_LINE3, "S-2: " + NumToStr(SENSOR_2));
+   TextOut(0, LCD_LINE4, "S-3: " + NumToStr(SENSOR_3));
+   TextOut(0, LCD_LINE5, "S-4: " + NumToStr(SENSOR_4));
+  }
+}
+
+task main() {
+  SetSensorLight(S1);
+  SetSensorLight(S2);
+  SetSensorLight(S3);
+  SetSensorLight(S4);
+
+  start lcd;
+  start timer;
+  start timer2;
+  start timer3;
+  start timer4;
+
+//---------------------------------------------------------------------------------------------------Sicherung für Sensoren-FAIL
+  while(SENSOR_1 == 0 || SENSOR_2 == 0 || SENSOR_3 == 0 || SENSOR_4 == 0) {
+   Off(OUT_ABC);
+   PlayTone(523,1200);
+  }
+
+//---------------------------------------------------------------------------------------------------Kalibrierung
+  if(touch3 && touch4) {
+   wzm = false;
+   while(touch3 || touch4)
+    Wait(1);
+   Wait(200);
+   PlayTone(523,200);
+   until(touch3 || touch4)
+    sw1 = SENSOR_1;
+   Wait(200);
+   PlayTone(523,200);
+   until(touch3 || touch4)
+    sw2 = SENSOR_2;
+   Wait(200);
+   PlayTone(523,200);
+   until(touch3 || touch4)
+    sw3 = SENSOR_3;
+   Wait(200);
+   PlayTone(523,200);
+   until(touch3 || touch4)
+    sw4 = SENSOR_4;
+   Wait(200);
+   PlayTone(523,200);
+   until(touch3 || touch4)
+    Wait(1);
+   Timer1 = 0;
+   Timer2 = 0;
+   wzm = true;
+  }
+
+//--------------------------------------------------------------------------------------------------DoThisBeforeTheProgramStarts
+  DoThisBeforeTheProgramStarts;
+
+//--------------------------------------------------------------------------------------------------Programmstart
+  anfang:
+  while(true) {
+   OnFwd(OUT_AB, motpow);
+
+//--------------------------------------------------------------------------------------------------Linie
+    //--------------------------------------------------------------------------links
+    links:
+    if(schwarz1 && wz == 0) {
+     while(schwarz1 || schwarz3) {
+      while(schwarz1 && schwarz3) {
+       Off(OUT_AB);
+       OnFwd(OUT_B, motpow);
+       Wait(500);
+      }
+      OnFwd(OUT_B, motpow);
+      OnRev(OUT_A, motpow);
+      Wait(150);
+      Off(OUT_AB);
+      OnFwd(OUT_B, motpow);
+      Wait(50);
+      if(schwarz2 && schwarz4 && (!(schwarz1 && schwarz3)))
+      goto rechts;
+     }
+     Timer1 = 0;
+     Timer2 = 0;
+     goto links;
+    }
+    //--------------------------------------------------------------------------rechts
+    rechts:
+    if(schwarz2 && wz == 0) {
+     while(schwarz2 || schwarz4) {
+      while(schwarz2 && schwarz4) {
+       Off(OUT_AB);
+       OnFwd(OUT_A, motpow);
+       Wait(500);
+      }
+      OnFwd(OUT_A, motpow);
+      OnRev(OUT_B, motpow);
+      Wait(150);
+      Off(OUT_AB);
+      OnFwd(OUT_A, motpow);
+      Wait(50);
+      if(schwarz1 && schwarz3 && (!(schwarz2 && schwarz4)))
+      goto links;
+     }
+     Timer1 = 0;
+     Timer2 = 0;
+     goto rechts;
+    }
+    //--------------------------------------------------------------------------links2
+    if(schwarz3 && wz == 0) {
+     OnFwd(OUT_B, motpow);
+     OnRev(OUT_A, motpow);
+     Wait(150);
+     OnFwd(OUT_AB, motpow);
+     Wait(25);
+     Timer1 = 0;
+    }
+    //--------------------------------------------------------------------------rechts2
+    if(schwarz4 && wz == 0) {
+     OnFwd(OUT_A, motpow);
+     OnRev(OUT_B, motpow);
+     Wait(150);
+     OnFwd(OUT_AB, motpow);
+     Wait(25);
+     Timer1 = 0;
+    }
+
+//--------------------------------------------------------------------------------------------------Touch
+    if((touch1 || touch2 || touch3 || touch4) && !wz) {
+     bool SteinTeil = false;
+     tu++;
+     if(tu < 2) {
+      OnFwd(OUT_AB, motpow);
+      Wait(500);
+      if(touch1 && touch2) {
+       SteinTeil = true;
+       PlayTone(523,1200);
+       stein:
+       OnRev(OUT_AB, motpow);
+       Wait(700);
+       if(slr == "A" || slr == "R" || slr == "r" || slr == "a" || slr == "rechts" || slr == "") {
+        bool steinigung = false;
+        for(int i = 0; i < 100; i++) {
+         OnFwd(OUT_A, motpow);
+         OnRev(OUT_B, motpow);
+         Wait(3);
+         if(schwarz1 || schwarz2 || schwarz3 || schwarz4)
+          steinigung = true;
+        }
+        if(steinigung) {
+         OnFwd(OUT_AB, motpow);
+         Wait(700);
+         int ct = CurrentTick();
+         until(schwarz1 || schwarz3) {
+          if(touch1 && touch2)
+           goto stein;
+          OnFwd(OUT_AB, motpow);
+          Wait(25);
+          if((schwarz2 || schwarz4) && (CurrentTick() >= (ct + 2500)))
+           ssr = true;
+          OnRev(OUT_A, motpow);
+          OnFwd(OUT_B, motpow);
+          Wait(12);
+          if((schwarz2 || schwarz4) && (CurrentTick() >= (ct + 2500)))
+           ssr = true;
+          if(touch1) {
+           OnFwd(OUT_A, motpow);
+           OnRev(OUT_B, motpow);
+           Wait(200);
+          }
+         }
+         Timer3 = 0;
+         while(Timer3 < 1 || schwarz1 || schwarz3) {
+          OnFwd(OUT_AB, motpow);
+          if(schwarz1 || schwarz3)
+           Timer3 = 0;
+          if(schwarz2 || schwarz4/* || ssr == true*/) {
+           OnFwd(OUT_AB, motpow);
+           Wait(300);
+           until(schwarz1 || schwarz3) {
+            OnFwd(OUT_A, motpow);
+            OnRev(OUT_B, motpow);
+           }
+           ssr = false;
+           Timer3 = 1;
+           Timer1 = 0;
+           goto anfang;
+          }
+         }
+        } else {
+         OnRev(OUT_AB, motpow);
+         Wait(500);
+         OnFwd(OUT_A, motpow);
+         OnRev(OUT_B, motpow);
+         Wait(300);
+        }
+       }
+       if(slr == "B" || slr == "L" || slr == "l" || slr == "b" || slr == "links") {
+        bool steinigung = false;
+        for(int i = 0; i < 100; i++) {
+         OnFwd(OUT_B, motpow);
+         OnRev(OUT_A, motpow);
+         Wait(3);
+         if(schwarz1 || schwarz2 || schwarz3 || schwarz4)
+          steinigung = true;
+        }
+        if(steinigung) {
+         OnFwd(OUT_AB, motpow);
+         Wait(700);
+         int ct = CurrentTick();
+         until(schwarz2 || schwarz4) {
+          if(touch1 && touch2)
+           goto stein;
+          OnFwd(OUT_AB, motpow);
+          Wait(25);
+          if((schwarz1 || schwarz3) && CurrentTick() >= (ct + 2500))
+           ssr = true;
+          OnRev(OUT_B, motpow);
+          OnFwd(OUT_A, motpow);
+          Wait(12);
+          if((schwarz1 || schwarz3) && CurrentTick() >= (ct + 2500))
+           ssr = true;
+          if(touch2){
+           OnFwd(OUT_B, motpow);
+           OnRev(OUT_A, motpow);
+           Wait(200);
+          }
+         }
+         Timer3 = 0;
+         while(Timer3 < 1 || schwarz2 || schwarz4) {
+          OnFwd(OUT_AB, motpow);
+          if(schwarz2 || schwarz4)
+           Timer3 = 0;
+          if(schwarz1 || schwarz3/* || ssr == true*/) {
+           OnFwd(OUT_AB, motpow);
+           Wait(300);
+           until(schwarz2 || schwarz4) {
+            OnFwd(OUT_B, motpow);
+            OnRev(OUT_A, motpow);
+           }
+           ssr = false;
+           Timer3 = 1;
+           Timer1 = 0;
+           goto anfang;
+          }
+         }
+        } else {
+         OnRev(OUT_AB, motpow);
+         Wait(500);
+         OnFwd(OUT_A, motpow);
+         OnRev(OUT_B, motpow);
+         Wait(1000);
+        }
+       }
+       Timer1 = 0;
+       goto anfang;
+      }
+     }
+     if(touch3 || touch4) {
+      OnRev(OUT_AB, motpow);
+      Wait(3000);
+      byte i = OUT_A;
+      if(Timer1%2 == 0)
+       i = OUT_B;
+      OnFwd(i, 100);
+      Wait(150);
+      goto anfang;
+     }
+     if(touch1 || touch2 && !SteinTeil) {
+       if(touch1) {
+         OnRev(OUT_AB, motpow);
+         Wait(500);
+         OnFwd(OUT_A, motpow);
+         OnRev(OUT_B, motpow);
+         Wait(300);
+       }
+       if(touch2) {
+         OnRev(OUT_AB, motpow);
+         Wait(500);
+         OnFwd(OUT_B, motpow);
+         OnRev(OUT_A, motpow);
+         Wait(300);
+       }
+     }
+     Timer2 = 0;
+     ClearScreen();
+    }
+
+//--------------------------------------------------------------------------------------------------FAIL-Sicherung
+    if(Timer2 > 2000) {
+     fail:
+     if(!wz && !rz) {
+      until(schwarz1 || schwarz2 || schwarz3 || schwarz4)
+       OnRev(OUT_AB, motpow);
+     }
+     else if(wz && !rz) {
+      OnRev(OUT_AB, motpow);
+      Wait(1000);
+      until(touch1 || touch2) {
+       OnFwd(OUT_B, motpow);
+       OnFwd(OUT_A, motpow/3);
+      }
+     }
+     OnRev(OUT_AB, motpow);
+     Wait(500);
+     OnFwd(OUT_AB, motpow);
+     Timer2 = 0;
+     Timer1 = 0;
+    }
+
+//--------------------------------------------------------------------------------------------------Pause
+    /*if(ButtonPressed(BTNCENTER, false)) {
+     while(ButtonPressed(BTNCENTER, false)) {
+      Off(OUT_ABC);
+      PlayTone(523,1200);
+     } if(pause == false) {
+      pause = true;
+      stop timer;
+      stop timer2;
+      stop timer3;
+      stop timer4;
+      until(ButtonPressed(BTNCENTER, false)) {
+       Off(OUT_ABC);
+      }
+      pause = false;
+      start timer;
+      start timer2;
+      start timer3;
+      start timer4;
+      while(ButtonPressed(BTNCENTER, false)) {
+       Off(OUT_ABC);
+      }
+     }
+    }*/
+
+//--------------------------------------------------------------------------------------------------Rampe
+    rampe:
+    if(!wz && wzm && Timer1 > 5000) {
+     wz = true;
+     Off(OUT_AB);
+     motpowsave = motpow;
+     //motpow = 80;
+     Timer2 = 0;
+    }
+    //--------------------------------------------------------------------------Wand
+    if((touch1 || touch2) && wz) {
+      if(touch1) {
+       to++;
+       if(to >= 2)
+        goto po;
+       OnFwd(OUT_A, motpow);
+       OnRev(OUT_B, motpow);
+       Wait(200);
+      }
+      if(touch2) {
+       to++;
+       if(to >= 2)
+        goto po;
+       OnFwd(OUT_B, motpow);
+       OnRev(OUT_A, motpow);
+       Wait(200);
+      }
+      Timer2 = 0;
+    }
+    //--------------------------------------------------------------------------Plattform oben
+    po:
+    if(to >= 2) {
+     OnFwd(OUT_AB, 100);
+     Wait(1000);
+     Off(OUT_AB);
+     OnRev(OUT_B, 100);
+     Wait(750);
+     Timer1 = 0;
+     while(Timer1 < 800) {
+      OnFwd(OUT_AB, motpow);
+      if(touch1) {
+       OnRev(OUT_AB, motpow);
+       Wait(250);
+       Off(OUT_AB);
+       OnRev(OUT_B, motpow);
+       Wait(300);
+       Timer1 = 0;
+       tolr++;
+      }
+      if(touch2 && tolr > 1) {
+       OnRev(OUT_AB, motpow);
+       Wait(250);
+       Off(OUT_AB);
+       OnRev(OUT_A, motpow);
+       Wait(300);
+       Timer1 = 0;
+      }
+     }
+     rz = true;
+    }
+    
+//--------------------------------------------------------------------------------------------------Rote Zone
+    if(rz) {
+     Off(OUT_AB);
+     Wait(100);
+     OnFwd(OUT_A, motpow);
+     OnFwd(OUT_B, motpow/4);
+     Wait(2000);
+     Off(OUT_AB);
+     OnRev(OUT_B, 100);
+     Wait(100);
+     OnRev(OUT_AB, 100);
+     Wait(2000);
+     rozo:
+     lr = 0;
+     lrc = 0;
+     sidrz = 0;
+     while(true) {
+      OnFwd(OUT_AB, 75);
+      if(rzb) {
+       until(touch2) {
+        OnFwd(OUT_A, motpow);
+        OnFwd(OUT_B, motpow/1.7);
+       }
+       until(touch1 || tdose || tpodest) {
+        OnFwd(OUT_A, motpow);
+        OnFwd(OUT_B, motpow/1.5);
+        if(touch2) {
+         OnRev(OUT_AB, motpow);
+         Wait(200);
+         Off(OUT_AB);
+         OnRev(OUT_A, motpow);
+         Wait(500);
+        }
+       }
+       OnFwd(OUT_AB, motpow);
+       Wait(300);
+       if(tdose) goto dose;
+       else if(tpodest) goto podest;
+       else if(touch1) {
+        until(touch2) {
+         OnRev(OUT_AB, motpow);
+         Wait(200);
+         Off(OUT_AB);
+         OnRev(OUT_A, motpow);
+         Wait(100);
+         until(touch1 || touch2)
+          OnFwd(OUT_AB, motpow);
+        }
+        until(touch1 && touch2)
+         OnFwd(OUT_AB, motpow);
+        OnRev(OUT_A, motpow/3);
+        OnRev(OUT_B, motpow);
+        Wait(500);
+        OnFwd(OUT_B, motpow);
+        OnRev(OUT_A, motpow);
+        Wait(500);
+        until(touch1 && touch2)
+         OnFwd(OUT_AB, motpow);
+       }
+       rzb = false;
+       goto rozo;
+      }
+      //------------------------------------------------------------------------Wand
+      if(touch1 || touch2) {
+       srzm = true;
+       OnFwd(OUT_AB, motpow);
+       Wait(1500);
+       if(tdose)
+        goto dose;
+       OnRev(OUT_AB, motpow);
+       Wait(1200);
+       Off(OUT_AB);
+       lrc++;
+       if(lrc > 20) {
+        until(tpodest) {
+         OnFwd(OUT_A, motpow/1.5);
+         OnFwd(OUT_B, motpow);
+         if(touch1 || touch2) {
+          OnFwd(OUT_AB, motpow);
+          Wait(500);
+          if(tdose) goto dose;
+          if(touch1 && touch2) {
+           Off(OUT_AB);
+           OnRev(OUT_B, motpow);
+           Wait(400);
+          } else {
+           OnRev(OUT_AB, motpow);
+           Wait(100);
+           OnFwd(OUT_A, motpow);
+           OnRev(OUT_B, motpow);
+           Wait(200);
+          }
+         }
+         if(tdose) goto dose;
+        }
+        lrc = 0;
+        OnFwd(OUT_AB, 100);
+        Wait(1500);
+        goto podest2;
+       }
+       if(lr == 0) {
+        RotateMotor(OUT_B, 100, 360*4.5);
+        RotateMotor(OUT_A, 100, -360*1.3);
+        lr = 1;
+       }
+       else if(lr == 1) {
+        RotateMotor(OUT_A, 100, 360*4.5);
+        RotateMotor(OUT_B, 100, -360*1.1);
+        lr = 0;
+       }
+       OnRev(OUT_AB, 100);
+       Wait(3300);
+      }
+      //------------------------------------------------------------------------Schwarz (in case of FAIL)
+      if((schwarz1 || schwarz2 || schwarz3 || schwarz4) && srzm) {
+       sidrz++;
+       srzm = false;
+       if(sidrz >= 5) {
+        sidrz = 0;
+        rz = false;
+        wz = false;
+        Timer1 = 0;
+        Timer2 = 0;
+        wzm = true;
+        motpow = motpowsave;
+        goto anfang;
+       }
+      }
+      //------------------------------------------------------------------------Podest
+      podest:
+      if(tpodest && ((rzse == "C" || rzse == "c" || rzse == "3") || lrc > 5)){
+       podest2:
+       rzb = false;
+       if(d)
+        goto fertig;
+       else {
+        if(rzse == "A" || rzse == "a" || rzse == "1") {
+         zdsr++;
+         if(zdsr%2 != 0) {
+          OnRev(OUT_AB, motpow);
+          Wait(1000);
+          OnFwd(OUT_A, 80);
+          OnRev(OUT_B, 80);
+          Wait(750);
+          until(tpodest) {
+           OnFwd(OUT_A, motpow/1.5);
+           OnFwd(OUT_B, motpow);
+           if(touch1 || touch2) {
+            OnFwd(OUT_AB, motpow);
+            Wait(500);
+            if(tdose) goto dose;
+            if(touch1 && touch2) {
+             Off(OUT_AB);
+             OnRev(OUT_B, motpow);
+             Wait(400);
+            } else {
+             OnRev(OUT_AB, motpow);
+             Wait(100);
+             OnFwd(OUT_A, motpow);
+             OnRev(OUT_B, motpow);
+             Wait(200);
+            }
+           }
+           if(tdose) goto dose;
+          } goto podest2;
+         }
+         OnRev(OUT_AB, motpow);
+         Wait(2500);
+         OnFwd(OUT_A, 80);
+         OnRev(OUT_B, 80);
+         Wait(1500);
+         until((touch1 && touch2) || touch3 || touch4)
+          OnFwd(OUT_AB, motpow);
+         if(touch3 || touch4) {
+          OnFwd(OUT_AB, motpow);
+          Wait(1000);
+          goto dose2;
+         }
+         else if(touch1 && touch2) {
+          OnRev(OUT_AB, motpow);
+          Wait(500);
+          OnFwd(OUT_B, motpow);
+          OnRev(OUT_A, motpow);
+          Wait(1000);
+          goto rozo;
+         }
+        }
+        else if(rzse == "B" || rzse == "b" || rzse == "2") {
+         zdsr++;
+         if(zdsr%2 != 0) {
+          OnRev(OUT_AB, motpow);
+          Wait(1000);
+          OnFwd(OUT_A, 80);
+          OnRev(OUT_B, 80);
+          Wait(750);
+          until(tpodest) {
+           OnFwd(OUT_A, motpow/1.5);
+           OnFwd(OUT_B, motpow);
+           if(touch1 || touch2) {
+            OnFwd(OUT_AB, motpow);
+            Wait(500);
+            if(tdose) goto dose;
+            if(touch1 && touch2) {
+             Off(OUT_AB);
+             OnRev(OUT_B, motpow);
+             Wait(400);
+            } else {
+             OnRev(OUT_AB, motpow);
+             Wait(100);
+             OnFwd(OUT_A, motpow);
+             OnRev(OUT_B, motpow);
+             Wait(200);
+            }
+           }
+           if(tdose) goto dose;
+          } goto podest2;
+         }
+         OnRev(OUT_AB, motpow);
+         Wait(2500);
+         OnFwd(OUT_B, 80);
+         OnRev(OUT_A, 80);
+         Wait(1500);
+         until((touch1 && touch2) || touch3 || touch4)
+          OnFwd(OUT_AB, motpow);
+         if(touch3 || touch4) {
+          OnFwd(OUT_AB, motpow);
+          Wait(1000);
+          goto dose2;
+         }
+         else if(touch1 && touch2) {
+          OnRev(OUT_AB, motpow);
+          Wait(500);
+          OnFwd(OUT_B, motpow);
+          OnRev(OUT_A, motpow);
+          Wait(1000);
+          goto rozo;
+         }
+        }
+        else if(rzse == "C" || rzse == "c" || rzse == "3") {
+         until(touch2) {
+          OnFwd(OUT_AB, motpow);
+          if(tpodest || touch1) {
+           OnRev(OUT_AB, motpow);
+           Wait(150);
+           OnFwd(OUT_B, motpow);
+           OnRev(OUT_A, motpow);
+           Wait(250);
+          }
+          if(tdose) goto dose;
+         } Off(OUT_AB);
+         until(touch1) {
+          OnFwd(OUT_A, 100);
+         }
+         OnRev(OUT_A, motpow/3);
+         OnRev(OUT_B, motpow);
+         Wait(500);
+         OnFwd(OUT_B, motpow);
+         OnRev(OUT_A, motpow);
+         Wait(500);
+         until(touch1 && touch2)
+          OnFwd(OUT_AB, motpow);
+        }
+       }
+      }
+      //------------------------------------------------------------------------Dose
+      dose:
+      if(tdose) {
+       dose2:
+       d = true;
+       Off(OUT_AB);
+       PlayTone(523,1200);
+       Wait(1000);
+       OnRev(OUT_AB, motpow);
+       Wait(2000);
+       Off(OUT_AB);
+       RotateMotor(OUT_A, 100, 360*2.75);
+       RotateMotor(OUT_B, 100, -360*2.75);
+       OnFwd(OUT_C, 100);
+       Wait(2500);
+       Off(OUT_C);
+       OnRev(OUT_AB, motpow);
+       Wait(2000);
+       Off(OUT_AB);
+       OnRev(OUT_C, 100);
+       Wait(1400);
+       Off(OUT_C);
+       OnFwd(OUT_AB, motpow);
+       Wait(1550);
+       Off(OUT_AB);
+       OnRev(OUT_C, 100);
+       Wait(1700);
+       Off(OUT_C);
+       until(touch1 || touch2 || touch3 || touch4)
+        OnFwd(OUT_AB, motpow);
+       dr:
+       while(true) {
+        //OnRev(OUT_C, 10);
+        OnFwd(OUT_A, motpow-30);
+        OnFwd(OUT_B, motpow);
+        if(touch1 || touch2) {
+         OnRev(OUT_AB, motpow);
+         Wait(100);
+         OnFwd(OUT_A, motpow);
+         OnRev(OUT_B, motpow);
+         Wait(200);
+        }
+        if(touch3 || touch4) {
+         OnFwd(OUT_AB, motpow);
+         Wait(500);
+         if(tpodest)
+          goto fertig;
+         if(tdose)
+          goto dose2;
+        }
+        if(tpodest) {
+         fertig:
+         if(d) {
+          OnRev(OUT_AB, motpow);
+          Wait(200);
+          OnFwd(OUT_A, motpow);
+          OnRev(OUT_B, motpow);
+          Wait(300);
+          OnFwd(OUT_AB, 100);
+          Wait(2000);
+          OnRev(OUT_AB, motpow);
+          Wait(1000);
+          Off(OUT_AB);
+          RotateMotor(OUT_A, 85, -360*2.75);
+          RotateMotor(OUT_B, 85, 360*2.65);
+          OnRev(OUT_A, motpow);
+          OnRev(OUT_B, motpow/1.2);
+          Wait(2250);
+          Off(OUT_AB);
+          OnFwd(OUT_C, 100);
+          Wait(3500);
+          Off(OUT_C);
+          OnRev(OUT_AB, motpow);
+          Wait(1000);
+          OnFwd(OUT_AB, 100);
+          OnRev(OUT_C, 100);
+          Wait(3500);
+          Off(OUT_ABC);
+          OnFwd(OUT_C, 100);
+          Wait(3500);
+          OnRev(OUT_C, 100);
+          Wait(3500);
+          Off(OUT_C);
+          OnRev(OUT_AB, motpow);
+          Wait(2500);
+          Off(OUT_AB);
+          OnRev(OUT_A, 100);
+          Wait(750);
+          OnFwd(OUT_C, 100);
+          Wait(3000);
+          Off(OUT_C);
+          OnRev(OUT_AB, motpow);
+          Wait(1000);
+          OnFwd(OUT_AB, 100);
+          OnRev(OUT_C, 100);
+          Wait(3500);
+          goto finish;
+         } else
+          goto podest2;
+         finish:
+         Off(OUT_ABC);
+         PlayTone(659,1600);
+         Wait(280);
+         PlayTone(622,1600);
+         Wait(280);
+         PlayTone(659,1600);
+         Wait(280);
+         PlayTone(622,1600);
+         Wait(280);
+         PlayTone(659,1600);
+         Wait(280);
+         PlayTone(494,1600);
+         Wait(280);
+         PlayTone(587,1600);
+         Wait(280);
+         PlayTone(523,1600);
+         Wait(280);
+         PlayTone(440,1600);
+         Wait(280);
+         d = false;
+         if(zdsr < 3) {
+          RotateMotor(OUT_A, 100, -360*2.75);
+          RotateMotor(OUT_B, 100, 360*2.75);
+          until(tpodest) {
+           OnFwd(OUT_AB, motpow);
+           if(touch1) {
+            OnRev(OUT_AB, motpow);
+            Wait(200);
+            OnFwd(OUT_A, motpow);
+            OnRev(OUT_B, motpow);
+            Wait(400);
+           }
+           if(touch2) {
+            OnRev(OUT_AB, motpow);
+            Wait(200);
+            OnFwd(OUT_B, motpow);
+            OnRev(OUT_A, motpow);
+            Wait(400);
+           }
+          }
+          OnFwd(OUT_AB, 100);
+          Wait(500);
+          goto podest2;
+         } else {
+          zdsr = 1;
+          OnFwd(OUT_B, motpow);
+          OnRev(OUT_A, motpow);
+          Wait(3000);
+          Off(OUT_ABC);
+          //---------------------------------------------------------------------Old RotZon
+          while(true) {
+           OnFwd(OUT_AB, motpow);
+           //--------------------------------------------------------------------Wand
+           if(touch1 || touch2) {
+            OnFwd(OUT_AB, motpow);
+            Wait(1500);
+            if(tdose)goto dose;
+            OnRev(OUT_AB, motpow);
+            Wait(700);
+            OnFwd(OUT_A, motpow);
+            OnRev(OUT_B, motpow);
+            Wait(1500);
+           } if(tpodest)goto podest;
+           //--------------------------------------------------------------------Silber
+           if(SENSOR_1 >= 59 && SENSOR_2 >= 55) {
+            OnRev(OUT_AB, motpow);
+            Wait(700);
+            OnFwd(OUT_A, motpow);
+            OnRev(OUT_B, motpow);
+            Wait(2000);
+           }
+           if(tdose)
+            goto dose;
+          }//END - WHILE(TRUE) ALTES ROTE-ZONE-PROGRAMM -----
+         }//END - ELSE(ZDSR >= 3) ZDSR NACHGUCKEN            \
+        }//END - IF(TPODEST) IN DOSEN-ROUTINE                 |
+       }//END - WHILE(TRUE) DOSEN-ROUTINE                     |  ROTE ZONE
+      }//END - IF(TDOSE) BEGINN DER DOSEN-ROUTINE             |
+     }//END - WHILE(TRUE) ROTE-ZONE                          /
+    }//END - IF(RZ) BEGINN ROTE-ZONE -----------------------
+  }//END - WHILE(TRUE) ROBOTOP
+}//END - TASK MAIN()

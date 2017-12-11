@@ -1,0 +1,136 @@
+
+//LICHT PORT 1 :  WEIß = 57 - 61 59
+//LICHT PORT 2 :  WEIß = 61 - 66 63
+//LICHT PORT 3 :  WEIß = 64 - 68 65
+task main()
+{
+  SetSensor(SENSOR_1, SENSOR_LIGHT);
+  SetSensor(SENSOR_2, SENSOR_LIGHT);
+  SetSensor(SENSOR_3, SENSOR_LIGHT);
+  SetPower(OUT_AB,OUT_FULL);
+  
+  while(true)
+  {
+  
+    OnFwd(OUT_A);
+    OnFwd(OUT_B);
+
+
+    if (SENSOR_1 > 33 && SENSOR_1 < 53)
+    {
+      OnFwd(OUT_B);
+      OnRev(OUT_A);
+      Wait(10);
+    }
+    else
+    {
+     OnFwd(OUT_A);
+    }
+    
+    
+    if (SENSOR_3 > 44 && SENSOR_3 < 60)
+    {
+      OnFwd(OUT_A);
+      OnRev(OUT_B);
+      Wait(10);
+    }
+     else
+    {
+     OnFwd(OUT_B);
+    }
+    
+    
+    if (SENSOR_1 ==100)
+    {
+      OnRev(OUT_A);
+      OnRev(OUT_B);
+      Wait(20);
+      OnFwd(OUT_A);
+      OnRev(OUT_B);
+      Wait(20);
+    }
+    
+    if (SENSOR_3==100)
+    {
+      OnRev(OUT_A);
+      OnRev(OUT_B);
+      Wait(20);
+      OnFwd(OUT_B);
+      OnRev(OUT_A);
+      Wait(20 );
+     }
+     
+     
+    if (SENSOR_2<63&&SENSOR_3<65&&SENSOR_2>60&&SENSOR_3>63&&Timer(0)>100||SENSOR_2<63&&SENSOR_3<59&&SENSOR_2>60&&SENSOR_3>57&&Timer(0)>100)
+    {
+       Off(OUT_AB);
+       On(OUT_C);
+       PlaySound(SOUND_DOUBLE_BEEP);
+       Wait(100);
+       Off(OUT_C);
+       ClearTimer(0);
+       OnFwd(OUT_AB);
+       Wait(35);
+
+   }
+   
+   
+   if (SENSOR_2<66&&SENSOR_3<68&&SENSOR_2>62&&SENSOR_3>64&&Timer(0)>100)
+    {
+       Off(OUT_AB);
+       On(OUT_C);
+       PlaySound(SOUND_DOUBLE_BEEP);
+       Wait(100);
+       Off(OUT_C);
+       ClearTimer(0);
+       OnFwd(OUT_AB);
+       Wait(50);
+
+   }
+   
+   
+    if ((SENSOR_2>68)&&(SENSOR_2<78))
+    {
+       Off(OUT_C);
+    }
+    
+    
+
+    if((SENSOR_1==100||SENSOR_3==100)&&Timer(1)<200)
+        {
+        OnFwd(OUT_A);
+        OnRev(OUT_B);
+        Wait(60);
+        OnFwd(OUT_AB);
+        Wait(300);
+        OnFwd(OUT_B);
+        OnRev(OUT_A);
+        Wait(120);
+        OnFwd(OUT_AB);
+        }
+
+        if (SENSOR_1==100&&SENSOR_3<99&&Timer(1)>200)
+        {
+        OnRev(OUT_A);
+        OnRev(OUT_B);
+        Wait(20);
+        OnFwd(OUT_A);
+        OnRev(OUT_B);
+        Wait(20);
+        ClearTimer(1);
+        }
+        
+        if (SENSOR_3==100&&SENSOR_1<99&&Timer(1)>20)
+        {
+        OnRev(OUT_A);
+        OnRev(OUT_B);
+        Wait(20);
+        OnFwd(OUT_B);
+        OnRev(OUT_A);
+        Wait(20);
+        ClearTimer(1);
+       }
+       
+    }
+
+}

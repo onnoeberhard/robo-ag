@@ -1,0 +1,63 @@
+task main()
+{
+  int schwarzl=51;
+  int schwarzr=53;
+  int gruenr=1;
+  int gruenl=1;
+  int silberr=1;
+  int silberl=1;
+  SetSensorLight(S1);
+  SetSensorTouch(S2);
+  SetSensorTouch(S3);
+  SetSensorLight(S4);
+  OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+  while(true)
+  {
+    if(S1<schwarzr+3&&S1>schwarzr-3)
+    {
+      OnFwd(OUT_A,100);
+      Off(OUT_C);
+    }
+    else
+    {
+       if(S1<schwarzl+3&&S1>schwarzl-3)
+       {
+         OnFwd(OUT_C,100);
+         Off(OUT_A);
+       }
+       else
+       {
+         OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+       }
+    }
+       if(S1<silberl+3&&S1>silberl-3)
+       {
+         Off(OUT_AC);
+         PlayTone(450,500);
+         Wait(100);
+         OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+       }
+        if(S4<silberr+3&&S4>silberr-3)
+       {
+         Off(OUT_AC);
+         PlayTone(450,500);
+         Wait(100);
+         OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+       }
+        if(S1<gruenl+3&&S1>gruenl-3&&S4<gruenr+3&&S4>gruenr-3)
+       {
+         Off(OUT_AC);
+         PlayTone(450,500);
+         Wait(100);
+         OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+       }
+       if(S4<gruenr+3&&S4>gruenr-3&&S1<gruenl+3&&S1>gruenl-3)
+       {
+         Off(OUT_AC);
+         PlayTone(450,500);
+         Wait(100);
+         OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+       }
+    
+  }
+}

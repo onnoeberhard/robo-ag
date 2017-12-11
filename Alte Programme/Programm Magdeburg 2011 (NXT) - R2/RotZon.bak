@@ -1,0 +1,159 @@
+#define weiss1 SENSOR_1 > 63-20 && SENSOR_1 < 63+20
+#define weiss3 SENSOR_2 > 61-20 && SENSOR_2 < 61+20
+#define silber1 SENSOR_1 > 87-12 && SENSOR_1 < 87+12
+#define silber3 SENSOR_2 > 79-12 && SENSOR_2 < 79+12
+#define schwarz1 SENSOR_1 > 39-9 && SENSOR_1 < 39+9
+#define schwarz3 SENSOR_2 > 37-9 && SENSOR_2 < 37+9
+#define schwarz12 SENSOR_1 > 45-15 && SENSOR_1 < 45+15
+#define schwarz32 SENSOR_2 > 46-15 && SENSOR_2 < 46+15
+
+#define dose2 SENSOR_3 > 75-25 && SENSOR_3 < 75+25
+
+#define touch1 SENSOR_1 == 100
+#define touch3 SENSOR_2 == 100
+#define touch4 SENSOR_4 == 100
+
+#define __NOTETIME   22
+#define __WAITTIME   12
+
+
+int wzm = 1;
+int wz = 1;                                   // U N B E D I N G T  INT WZ = 0 !
+int sz = 0;                                   // U N B E D I N G T  INT SZ = 0 !
+int motpow = 78;
+
+task main()
+{
+  //SetSensor(SENSOR_1, SENSOR_LIGHT);
+  //SetSensor(SENSOR_2, SENSOR_LIGHT);
+  //SetSensor(SENSOR_3, SENSOR_LIGHT);
+  SetSensorLight(S1);
+  SetSensorLight(S2);
+  SetSensorLight(S3);
+  SetSensorLight(S4);
+// SetPower(OUT_AB, 6);
+//------------------------------------------------------------------------------Programmstart
+  while(true)
+  {
+    OnFwd(OUT_AB, motpow);
+//------------------------------------------------------------------------------Rote Zone (wenn Silber gefunden(Linie))
+      if(silber1 && silber3 && wz == 1)
+      {
+       PlayTone(523,16*22);
+       Wait(16*12);
+
+       OnFwd(OUT_C, motpow);
+       Wait(1000);
+       Off(OUT_C);
+
+       OnFwd(OUT_AB, motpow);
+       Wait(1000);
+       OnFwd(OUT_A, motpow);
+       OnRev(OUT_B, motpow);
+       Wait(1000);
+
+       while(true)
+       {
+        motpow = 80;
+        OnFwd(OUT_AB, motpow);
+//------------------------------------------------------------------------------Dose und Wand
+
+        if(touch1)
+        {
+          OnRev(OUT_AB, motpow);
+          Wait(700);
+          //rechts
+          OnFwd(OUT_A, motpow);
+          OnRev(OUT_B, motpow);
+          Wait(2000);
+        }
+        if(touch3)
+        {
+          OnRev(OUT_AB, motpow);
+          Wait(700);
+          //links
+          OnFwd(OUT_B, motpow);
+          OnRev(OUT_A, motpow);
+          Wait(2000);
+        }
+
+         if(dose2)
+         {
+           motpow = 50;
+           OnFwd(OUT_AB, motpow);
+           Wait(10000);
+           if(touch1 && touch3 && touch4)
+           {
+            OnFwd(OUT_C, motpow);
+            Wait(1000);
+            Off(OUT_C);
+            while(dose2)
+            {
+              OnFwd(OUT_A, motpow);
+              OnRev(OUT_B, motpow);
+              Wait(2000);
+              OnFwd(OUT_AB, motpow);
+              Wait(10000);
+            }
+            if(dose2 && (schwarz1 || touch1) && (schwarz3 || touch3))
+            {
+             OnRev(OUT_AB, motpow);
+             Wait(200);
+             if(schwarz1 && schwarz3)
+             {
+              Off(OUT_AB);
+              while(true)
+              {
+               ende:
+               OnFwd(OUT_C, motpow);
+               //PlaySound(SOUND_UP);
+               PlayTone(523,1200);
+               Wait(40);
+               PlayTone(523,1200);
+               Wait(40);
+               PlayTone(523,1200);
+               Wait(40);
+               PlayTone(659,1200);
+               Wait(40);
+               PlayTone(523,1200);
+               Wait(40);
+               goto ende;
+              }
+             }
+            }
+           }
+           else
+           {
+            motpow = 80;
+            OnRev(OUT_AB, motpow);
+            Wait(700);
+            //links
+            OnFwd(OUT_B, motpow);
+            OnRev(OUT_A, motpow);
+            Wait(2000);
+           }
+         }
+
+       //------------------------------------------------------------------------------Silber gefunden
+       if(schwarz1 || schwarz3)
+       {
+         OnRev(OUT_AB, motpow);
+         Wait(1500);
+         OnFwd(OUT_B, motpow);
+         OnRev(OUT_A, motpow);
+         Wait(1500);
+       }
+       if(silber1 && silber3)
+       {
+        OnRev(OUT_AB, motpow);
+        Wait(1500);
+        OnFwd(OUT_B, motpow);
+        OnRev(OUT_A, motpow);
+        Wait(1500);                                         //Kurve links-----100
+       }
+       }
+       }
+     }
+
+}
+//------------------------------------------------------------------------------Ende

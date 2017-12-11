@@ -1,0 +1,144 @@
+task main()
+{
+  SetSensor(SENSOR_1, SENSOR_LIGHT);
+  SetSensor(SENSOR_2, SENSOR_LIGHT);
+  SetSensor(SENSOR_3, SENSOR_LIGHT);
+//------------------------------------------------------------------------------Programmstart
+  while(true)
+  {
+    OnFwd(OUT_AB);
+          if(SENSOR_1 >99)
+          {
+           OnFwd(OUT_AB);
+           Wait(30);
+           if(SENSOR_1 > 99&&SENSOR_3 > 99)
+           {
+             OnRev(OUT_AB);
+             Wait(100);
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(160);
+             OnFwd(OUT_AB);
+             Wait(100);
+             while(SENSOR_2 > 59 &&SENSOR_3 >59 &&SENSOR_3 < 67 &&SENSOR_2 <67)
+                  {
+                  OnFwd(OUT_AB);
+                  Wait(5);
+                  OnFwd(OUT_AB);
+                  Wait(5);
+                  OnFwd(OUT_AB);
+                  Wait(5);
+                  OnFwd(OUT_AB);
+                  Wait(5);
+                  OnFwd(OUT_AB);
+                  Wait(5);
+                  OnFwd(OUT_AB);
+                  Wait(5);
+
+                  OnRev(OUT_A);
+                  OnFwd(OUT_B);
+                  Wait(5);
+                  OnRev(OUT_A);
+                  OnFwd(OUT_B);
+                  Wait(5);
+                  OnRev(OUT_A);
+                  OnFwd(OUT_B);
+                  Wait(5);
+                  OnRev(OUT_A);
+                  OnFwd(OUT_B);
+                  Wait(5);
+                  OnRev(OUT_A);
+                  OnFwd(OUT_B);
+                  Wait(5);
+                  }
+             OnFwd(OUT_AB);
+             Wait(60);
+             /*while(SENSOR_2 > 59 &&SENSOR_3 >59 &&SENSOR_3 < 67 &&SENSOR_2 <67)
+                  {
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+                  }
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(30);*/
+             }
+          else
+           {
+           OnRev(OUT_A);
+           OnRev(OUT_B);
+           Wait(20);
+           OnFwd(OUT_A);
+           OnRev(OUT_B);
+           Wait(20);
+           }
+          }
+
+          if(SENSOR_3 >99)
+          {
+           OnFwd(OUT_AB);
+           Wait(30);
+           if(SENSOR_1 > 99&&SENSOR_3 > 99)
+           {
+             OnRev(OUT_AB);
+             Wait(100);
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(160);
+             OnFwd(OUT_AB);
+             Wait(100);
+             while(SENSOR_2 > 59 &&SENSOR_3 >59 &&SENSOR_3 < 67 &&SENSOR_2 <67)
+                  {
+                  OnFwd(OUT_AB);
+                  Wait(5);
+                  OnFwd(OUT_AB);
+                  Wait(5);
+                  OnFwd(OUT_AB);
+                  Wait(5);
+                  OnFwd(OUT_AB);
+                  Wait(5);
+                  OnFwd(OUT_AB);
+                  Wait(5);
+                  OnFwd(OUT_AB);
+                  Wait(5);
+
+                  OnRev(OUT_A);
+                  OnFwd(OUT_B);
+                  Wait(5);
+                  OnRev(OUT_A);
+                  OnFwd(OUT_B);
+                  Wait(5);
+                  OnRev(OUT_A);
+                  OnFwd(OUT_B);
+                  Wait(5);
+                  OnRev(OUT_A);
+                  OnFwd(OUT_B);
+                  Wait(5);
+                  OnRev(OUT_A);
+                  OnFwd(OUT_B);
+                  Wait(5);
+                  }
+             OnFwd(OUT_AB);
+             Wait(60);
+             /*while(SENSOR_2 > 59 &&SENSOR_3 >59 &&SENSOR_3 < 67 &&SENSOR_2 <67)
+                  {
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+                  }
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(30);*/
+             }
+           else
+           {
+            OnRev(OUT_A);
+            OnRev(OUT_B);
+            Wait(20);
+            OnFwd(OUT_B);
+            OnRev(OUT_A);
+            Wait(20);
+           }
+          }
+          
+}
+}
+

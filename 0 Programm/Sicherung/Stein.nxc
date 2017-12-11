@@ -1,0 +1,177 @@
+#define schwarz1 SENSOR_1 > sw1-15 && SENSOR_1 < sw1+15
+#define schwarz2 SENSOR_2 > sw2-15 && SENSOR_2 < sw2+15
+#define schwarz3 SENSOR_3 > sw3-15 && SENSOR_3 < sw3+15
+#define schwarz4 SENSOR_4 > sw4-15 && SENSOR_4 < sw4+15
+#define weiss1 SENSOR_1 > w1-10 && SENSOR_1 < w1+10
+#define weiss2 SENSOR_2 > w2-10 && SENSOR_2 < w2+10
+#define touch1 SENSOR_1 == 100
+#define touch2 SENSOR_2 == 100
+#define touch3 SENSOR_3 == 100
+#define touch4 SENSOR_4 == 100
+
+int sw1 = 29; int sw2 = 27; int sw3 = 40; int sw4 = 360;    //[s]ch[w]arz
+int w1 = 52; int w2 = 50; int w3 = 70; int w4 = 62;        //[w]eiss
+int motpow  = 80;  //[mot]or [pow]er
+string slr  = "A"; //[s]tein [l]inks [r]echts --- A/R = rechtsrum | B/L = linksrum
+string rzse = "A"; //[r]ote [z]one [s]chwarze [e]cke --- siehe Parcour oben
+int wzm = 0; //[w]eiße [z]one [m]essen
+int wz = 0; //[w]eiße [z]one
+int Timer1 = 0; //Timer für Rampe Messen (rampe auch [w]eiße [z]one)
+int Timer2 = 0; //Timer für Allgemeine FAIL-Verhinderung
+int Timer3 = 0; //Timer für Stein (bei Erkennung ser schwarzen Linie) + [t]ouch [o]ben zurücksetzen
+int ssr = 0; //[s]tein [s]chwarz [r]echts
+int to = 0; //[t]ouch [o]ben
+
+task timer3()
+{
+  while(true)
+  {
+   Timer3++;
+   Wait(300);
+   to = 0;
+   ClearScreen();
+  }
+}
+
+task main()
+{
+  SetSensorLight(S1);
+  SetSensorLight(S2);
+  SetSensorLight(S3);
+  SetSensorLight(S4);
+
+  anfang:
+//--------------------------------------------------------------------------------------------------Programmstart
+  while(true)
+  {
+    OnFwd(OUT_AB, motpow);
+//--------------------------------------------------------------------------------------------------Stein und Wand
+    if((touch1 || touch2 || touch3 || touch4) && !wz)
+    {
+     OnFwd(OUT_AB, motpow);
+     Wait(500);
+     if((touch1 && touch2) || touch3 || touch4)
+     {
+      PlayTone(523,1200);
+      stein:
+      OnRev(OUT_AB, motpow);
+      Wait(700);
+      if(slr == "A" || slr == "R" || slr == "r" || slr == "a" || slr == "rechts" || slr == "")
+      {
+       OnFwd(OUT_A, motpow);
+       OnRev(OUT_B, motpow);
+       Wait(500);
+       OnFwd(OUT_AB, motpow);
+       Wait(900);
+       int ct = CurrentTick();
+       while(!(schwarz1 || schwarz3))
+       {
+        if((touch1 && touch2) || touch3 || touch4)
+         goto stein;
+        OnFwd(OUT_AB, motpow);
+        Wait(250);
+        if((schwarz2 || schwarz4) && (CurrentTick() >= (ct + 2500)))
+         ssr = true;
+        OnRev(OUT_A, motpow);
+        OnFwd(OUT_B, motpow);
+        Wait(150);
+        if((schwarz2 || schwarz4) && (CurrentTick() >= (ct + 2500)))
+         ssr = true;
+        if(touch1) {
+         OnFwd(OUT_A, motpow);
+         OnRev(OUT_B, motpow);
+         Wait(200);
+        }
+       }
+       Timer3 = 0;
+       while(Timer3 < 1 || schwarz1 || schwarz3)
+       {
+        OnFwd(OUT_AB, motpow);
+        if(schwarz1 || schwarz3)
+         Timer3 = 0;
+        if(schwarz2 || schwarz4 || ssr == true)
+        {
+         OnFwd(OUT_AB, motpow);
+         Wait(300);
+         OnFwd(OUT_A, motpow);
+         OnRev(OUT_B, motpow);
+         Wait(700);
+         ssr = false;
+         Timer3 = 1;
+         break;
+        }
+       }
+      }
+      if(slr == "B" || slr == "L" || slr == "l" || slr == "b" || slr == "links")
+      {
+       OnFwd(OUT_B, motpow);
+       OnRev(OUT_A, motpow);
+       Wait(500);
+       OnFwd(OUT_AB, motpow);
+       Wait(900);
+       int ct = CurrentTick();
+       while(!(schwarz2 || schwarz4))
+       {
+        if((touch1 && touch2) || touch3 || touch4)
+         goto stein;
+        OnFwd(OUT_AB, motpow);
+        Wait(250);
+        if((schwarz1 || schwarz3) && CurrentTick() >= (ct + 2500))
+         ssr = true;
+        OnRev(OUT_B, motpow);
+        OnFwd(OUT_A, motpow);
+        Wait(150);
+        if((schwarz1 || schwarz3) && CurrentTick() >= (ct + 2500))
+         ssr = true;
+        if(touch2){
+         OnFwd(OUT_B, motpow);
+         OnRev(OUT_A, motpow);
+         Wait(200);
+        }
+       }
+       Timer3 = 0;
+       while(Timer3 < 1 || schwarz2 || schwarz4)
+       {
+        OnFwd(OUT_AB, motpow);
+        if(schwarz2 || schwarz4)
+         Timer3 = 0;
+        if(schwarz1 || schwarz3 || ssr == true)
+        {
+         OnFwd(OUT_AB, motpow);
+         Wait(300);
+         OnFwd(OUT_B, motpow);
+         OnRev(OUT_A, motpow);
+         Wait(700);
+         ssr = false;
+         Timer3 = 1;
+         break;
+        }
+       }
+      }
+      Timer1 = 0;
+      goto anfang;
+     }
+     else if(touch1 || touch2)
+     {
+       if(touch1)
+       {
+         OnRev(OUT_AB, motpow);
+         Wait(500);
+         OnFwd(OUT_A, motpow);
+         OnRev(OUT_B, motpow);
+         Wait(300);
+       }
+       if(touch2)
+       {
+         OnRev(OUT_AB, motpow);
+         Wait(500);
+         OnFwd(OUT_B, motpow);
+         OnRev(OUT_A, motpow);
+         Wait(300);
+       }
+     }
+     Timer2 = 0;
+     ClearScreen();
+    }
+  }
+}

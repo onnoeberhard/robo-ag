@@ -1,0 +1,164 @@
+
+                                              // Team FireWave
+#define __NOTETIME   10
+#define __WAITTIME   12
+
+task main()
+{
+  SetSensor(SENSOR_1,SENSOR_LIGHT);
+  SetSensor(SENSOR_3,SENSOR_LIGHT);
+  SetSensor(SENSOR_2,SENSOR_LIGHT);
+  OnFwd(OUT_A+OUT_B);
+  //SetSensorMode(SENSOR_1, SENSOR_MODE_RAW);
+  //SetSensorMode(SENSOR_3, SENSOR_MODE_RAW);
+  //SetSensorMode(SENSOR_2, SENSOR_MODE_RAW);
+  
+  while(1==1)
+  {
+    // Beginn Linie fahren
+    if (SENSOR_1 >=45 && SENSOR_1 <= 50)
+    {
+      OnRev(OUT_A+OUT_B);
+      Wait(2);
+      OnFwd(OUT_B);
+      OnRev(OUT_A);
+      Wait(5);
+    }
+    else
+    {
+      OnFwd(OUT_A+OUT_B);
+    }
+
+    if (SENSOR_3 >=42 && SENSOR_3 <=50)
+    {
+      OnRev(OUT_A+OUT_B);
+      Wait(2);
+      OnFwd(OUT_A);
+      OnRev(OUT_B);
+      Wait(5);
+    }
+    else
+    {
+      OnFwd(OUT_A+OUT_B);
+    }
+    // Ende Linie fahren
+     
+    // Beginn Grün
+      
+    if((SENSOR_1 >=50 && SENSOR_1 <=52 ) && (SENSOR_2 >=47)  && (SENSOR_2 <=52) || (SENSOR_2 >=47) && (SENSOR_2 <=52) && (SENSOR_3 >=56) && (SENSOR_3 <=59))  // Grün gefunden
+    {
+      if(Timer(1)>150)
+      {
+        Off(OUT_A+OUT_B);
+        OnFwd(OUT_C);
+        Wait(150);
+        PlayTone(262,4*__NOTETIME);
+        ClearTimer(1);
+      }
+    }
+    else
+    {
+      Off(OUT_C);
+    }
+      
+    // Ende grün
+
+    // Beginn silber
+
+    if((SENSOR_2 > 65 && SENSOR_3 > 66)||(SENSOR_1 >66 && SENSOR_2 > 63 )) // Silber gefunden
+    {
+      if(Timer(3)>150)
+      {
+        Off(OUT_A+OUT_B);
+        OnFwd(OUT_C);
+        Wait(150);
+        PlayTone(440,4*__NOTETIME);
+        Wait(4*__WAITTIME);
+        OnFwd(OUT_C);
+        Wait(200);
+        OnFwd(OUT_A+OUT_B);
+        Wait(10);
+        ClearTimer(3);
+      }
+    }
+    else
+    {
+      Off(OUT_C);
+    }
+    // Ende silber
+
+    if(SENSOR_2 >=56 && SENSOR_2 <=60 && SENSOR_3 >=60 && SENSOR_3 <= 64  && SENSOR_1 >= 99 )
+    {
+      OnRev(OUT_A+OUT_B);
+      Wait(20);
+      OnFwd(OUT_B);
+      Wait(85);
+      OnRev(OUT_A);
+      Wait(85);
+    }
+
+    //Beginn Stein
+
+    if (SENSOR_2 > 99 )
+    {
+      OnRev(OUT_A+OUT_B);
+      Wait(30);
+      OnFwd(OUT_B);
+      Wait(60);
+      OnRev(OUT_A);
+      Wait(60);
+      OnFwd(OUT_A+OUT_B);
+      Wait(200);
+      OnRev(OUT_B);
+      Wait(48);
+      OnFwd(OUT_A);
+      Wait(48);
+      OnFwd(OUT_A+OUT_B);
+      Wait(200);
+      OnFwd(OUT_A);
+      Wait(100);
+      OnRev(OUT_B);
+      Wait(100);
+      OnFwd(OUT_A+OUT_B);
+      Wait(120);
+      OnFwd(OUT_B);
+      Wait(70);
+      OnRev(OUT_A);
+      Wait(70);
+    }
+
+     }
+
+     //}
+
+
+     /*  if (SENSOR_1 >=36 && SENSOR_1 <=44)&&(SENSOR_3 >=39 && SENSOR_3 <=44)
+      {
+        ClearTimer(2);
+      }
+       if((Timer(2)>80)&&(SENSOR_1 > 99 || SENSOR_3 > 99 ))
+      {
+      OnRev(OUT_A+OUT_B);
+      Wait(300);
+      OnRev(OUT_A);
+      Wait(89);
+      OnFwd(OUT_B);
+      Wait(89);
+      OnRev(OUT_A+OUT_B);
+      Wait(200);
+      } */
+      
+      if(SENSOR_1 > 99)
+      {
+        OnRev(OUT_A+OUT_B);
+        OnFwd(OUT_A);
+        Wait(55);
+        OnRev(OUT_B);
+        Wait(55);
+        OnFwd(OUT_A+OUT_B);
+      }
+        else
+      {
+        OnFwd(OUT_A+OUT_B);
+      }
+ }

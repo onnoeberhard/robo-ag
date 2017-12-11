@@ -1,0 +1,171 @@
+//The rescue Robot
+#define __NOTETIME   10
+#define __WAITTIME   12
+
+
+task main ()
+{
+SetSensor(SENSOR_1,SENSOR_LIGHT);
+SetSensor(SENSOR_3,SENSOR_LIGHT);
+SetSensor(SENSOR_2,SENSOR_LIGHT);
+
+
+ while (true)
+ {
+//Sensor_1=links
+//Sensor_2_mitte
+//Sensor_3rechts
+//Motor_A=links
+//Motor_C=rechts
+//Lampe_B=Mitte
+
+
+//begin Linie fahren____________________________________________________________________________________
+
+  if(SENSOR_1>/*schwarz*/&&SENSOR_1</*Schwarz*/)
+    {
+     OnRev(OUT_A);
+     OnFwd(OUT_C);
+     until(SENSOR_1>/*Weiﬂ*/&&SENSOR_1<Weiﬂ)
+    }
+ 
+    if(SENSOR_3>/*schwarz*/&&SENSOR_3</*Schwarz*/)
+      {
+       OnRev(OUT_A);
+       OnFwd(OUT_C);
+       until(SENSOR_1>/*Weiﬂ*/&&SENSOR_1<Weiﬂ)
+      }
+   //Ende Linie fahren______________________________________________________________________________________
+
+
+   //begin maenchen erkennung
+   
+   //begin gruen
+     if(SENSOR_1>/*gruen*/&&SENSOR_1/*gruen*/)&&(SENSOR_2>/*gruen*/&&SENSOR_2/*gruen*/)||SENSOR_2>/*gruen*/&&SENSOR_2/*gruen*/)&&(SENSOR_3>/*gruen*/&&SENSOR_3/*gruen*/)
+     {
+     Off(OUT_A+OUT_C);
+     OnFwd(OUT_B);
+     PlayTone(262,4*__NOTETIME);
+     Wait(4*__WAITTIME);
+     Wait(200);
+     OnRev(OUT_A+OUT_B);
+     Wait(30);
+     if((SENSOR_1>/*Schwarz*/&&SENSOR_1</*schwarz*/)||(SENSOR_2>/*schwarz*/&&SENSOR_2</*schwarz*/)||(SENSOR_3>/*schwarz*/&&SENSOR_3</*schwarz*/))
+     OnFwd(OUT_A+OUT_C);
+     Wait(100);
+     b=1;
+     if((SENSOR_1>/*weiﬂ*/&&SESNOR_1</*Weiﬂ*/)&&(SENSOR_2>/*weiﬂ*/&&SENSOR_2</*weiﬂ*/)&&(SENSOR_3>/*weiﬂ*/&&SESNOR_3</*weiﬂ*/&&b=1))
+     OnRev(OUT_A);OnFwd(OUT_C);
+     until((SENSOR_2>/*schwarz*/&&SENSOR_2</*schwarz*/)||(SENSOR_3>/*schwarz*/&&SENSOR_3</*schwarz*/))
+     
+     }
+     //Ende maenchen gruen_______________________________________________________________________________________
+     
+     
+     
+     
+     //Anfang maenchen silber
+      if(SENSOR_1>/*silber*/&&SENSOR_1/*slilber*/)&&(SENSOR_2>/*silber*/&&SENSOR_2/*silber*/)||SENSOR_2>/*silber*/&&SENSOR_2/*silber*/)&&(SENSOR_3>/*siler*/&&SENSOR_3/*silber*/)
+     {
+     Off(OUT_A+OUT_C);
+     OnFwd(OUT_B);
+     PlayTone(262,4*__NOTETIME);
+     Wait(4*__WAITTIME);
+     Wait(200);
+      if((SENSOR_1>/*Schwarz*/&&SENSOR_1</*schwarz*/)||(SENSOR_2>/*schwarz*/&&SENSOR_2</*schwarz*/)||(SENSOR_3>/*schwarz*/&&SENSOR_3</*schwarz*/))
+     OnFwd(OUT_A+OUT_C);
+     Wait(100);
+     b=1;
+     if((SENSOR_1>/*weiﬂ*/&&SESNOR_1</*Weiﬂ*/)&&(SENSOR_2>/*weiﬂ*/&&SENSOR_2</*weiﬂ*/)&&(SENSOR_3>/*weiﬂ*/&&SESNOR_3</*weiﬂ*/&&b=1))
+     OnRev(OUT_A);OnFwd(OUT_C);
+     until((SENSOR_2>/*schwarz*/&&SENSOR_2</*schwarz*/)||(SENSOR_3>/*schwarz*/&&SENSOR_3</*schwarz*/))
+
+     }
+     //Ende silber
+     
+     //Ende maenchen erkennen
+     
+     
+     //Anfang Touch Sensor
+     
+     
+     //begin Stein
+     if(SENSOR_1>99&&SENSOR_3>99)
+     {
+      OnFwd(OUT_A);OnRev(OUT_C);
+      Wait(50);
+      OnFwd(OUT_A+OUT_C);
+      Wait(125);
+      OnFwd(OUT_C);OnRev(OUT_A);
+      Wait(50);
+      OnFwd(OUT_A+OUT_C);
+      Wait(250);
+      OnRev(OUT_A);OnFwd(OUT_C);
+      Wait(50);
+      OnFwd(OUT_A+OUT_C);
+      until(SENSOR_3>/*schwarz*/&&SENSOR_3</*schwarz*/)
+      Off(OUT_A);
+      OnRev(OUT_C);
+      Wait(40);
+      Off(OUT_C);
+      OnRev(OUT_A);
+      Wait(40);
+     }
+     //ende stein
+     
+     if(SENSOR_1>99)
+     {
+     OnFwd(OUT_A);OnRev(OUT_C);
+     Wait(40);
+     }
+     
+      if(SENSOR_3>99)
+     {
+     OnFwd(OUT_C);OnRev(OUT_A);
+     Wait(40);
+     }
+
+     if(SENSOR_2>99)
+     {
+     a=1
+     }
+     
+     
+     
+     //die rampe  begin
+     if(SENSOR_1>99&&SENSOR_3>99&&a=1)
+     {
+      OnRev(OUT_A+OUT_C);
+      Wait(20);
+      OnRev(OUT_C);OnFwd(OUT_A);
+      Wait(100); //90 grad kurve
+      OnFwd(OUT_A+OUT_C);
+      Wait(250);
+      OnRev(OUT_A);OnFwd(OUT_C);
+      Wait(100);    //90 grad kurve
+      OnRev(OUT_A+OUT_C);
+      Wait(40);
+      a=2;
+     }
+       //die rampe ende
+     
+      if(SENSOR_1>99&&SENSOR_3>99&&a=2)
+     {
+      OnRev(OUT_A+OUT_C);
+      Wait(20);
+      OnRev(OUT_C);OnFwd(OUT_A);
+      Wait(100); //90 grad kurve
+      OnFwd(OUT_A+OUT_C);
+      Wait(100);
+      OnRev(OUT_C);OnFwd(OUT_A);
+      Wait(100);    //90 grad kurve
+      OnRev(OUT_A+OUT_C);
+      Wait(40);
+     }
+     
+     
+     
+}
+
+}
+

@@ -1,0 +1,53 @@
+/*
+/0LOGBOOK
+0
+
+*/
+program test {
+	
+	#include <RCX2.h>
+	#include <RCX2MLT.h>
+	#include <RCX2Sounds.h>
+	#include <RCX2Def.h>
+	var kl = 0
+	sensor touch2 on 2
+	touch2 is switch as boolean
+	sensor light3 on 3
+	light3 is light as percent
+	
+	main {
+		ext InterfaceType "kFreestyle"
+		rcx_ClearTimers
+		bbs_GlobalReset([A B C])
+		try {
+			direction [ A C  ] [ ]
+			on [ A C  ] 
+		} retry on fail
+		try {
+			forever {
+				if touch2 is closed {
+					tone 441 for 100
+				}
+				else
+				{
+					sound off
+				} 
+				if light3 > 50{
+					direction [  ] [ A C ]
+					on [ A C  ] 
+					wait 310
+					on [ A C  ] 
+					direction [ C  ] [ A ]
+					wait 100
+					direction [ A C  ] [ ]
+					on [ A C  ] 
+				}
+				else
+				{
+				} 
+			}
+		} retry on fail
+	}
+	
+	
+}

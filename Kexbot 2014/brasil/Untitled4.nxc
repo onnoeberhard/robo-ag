@@ -1,0 +1,4 @@
+task main() {
+ OnFwd(OUT_A, -127);
+ OnRev(OUT_C, -100);
+}

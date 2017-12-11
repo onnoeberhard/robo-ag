@@ -1,0 +1,244 @@
+task main ()
+{
+while(true)
+       {
+        //rote_zone:
+        OnFwd(OUT_AB);
+//------------------------------------------------------------------------------Dose und Wand
+        if(SENSOR_3==100)
+        {
+          OnFwd(OUT_A);
+          OnRev(OUT_B);
+          Wait(20);
+          OnFwd(OUT_AB);
+          Wait(100);
+
+         if(SENSOR_2 > 90)
+         {
+            OnRev(OUT_AB);
+            Wait(60);
+            OnFwd(OUT_A);
+            OnRev(OUT_B);
+            Wait(100);
+            OnFwd(OUT_AB);
+            Wait(200);
+            if(SENSOR_1 == 100 || SENSOR_3 == 100)
+            {
+             OnRev(OUT_AB);
+             Wait(20);
+             //links
+             OnFwd(OUT_B);
+             OnRev(OUT_A);
+             Wait(230);
+            }
+            else
+            {
+             OnRev(OUT_AB);
+             Wait(200);
+             OnFwd(OUT_B);
+             OnRev(OUT_A);
+             Wait(100);
+             OnFwd(OUT_AB);
+             Wait(60);
+             if(SENSOR_2 > 90)
+             {
+              On(OUT_C);
+              Wait(100);
+              Off(OUT_C);
+              OnFwd(OUT_AB);
+              Wait(1000);
+              while(SENSOR_2 > 90)
+              {
+               OnFwd(OUT_A);
+               OnRev(OUT_B);
+               Wait(120);
+               OnFwd(OUT_AB);
+               Wait(1000);
+              }
+              if(SENSOR_2 < 90 && SENSOR_1 > 45 && SENSOR_3 > 45)
+              {
+               OnFwd(OUT_B);
+               OnRev(OUT_A);
+               Wait(10);
+               OnFwd(OUT_AB);
+               Wait(20);
+               if(SENSOR_2 < 90 && SENSOR_1 > 45 && SENSOR_3 > 45)
+               {
+                OnRev(OUT_AB);
+                Wait(20);
+                OnFwd(OUT_A);
+                OnRev(OUT_B);
+                Wait(20);
+                OnFwd(OUT_AB);
+                Wait(20);
+               }
+              }
+              if(SENSOR_1 < 45 && SENSOR_3 > 45)
+              {
+               OnRev(OUT_AB);
+               Wait(10);
+               OnFwd(OUT_B);
+               OnRev(OUT_A);
+               Wait(90);
+               OnFwd(OUT_AB);
+               Wait(150);
+              }
+              if(SENSOR_1 > 45 && SENSOR_3 < 45)
+              {
+               OnRev(OUT_AB);
+               Wait(10);
+               OnFwd(OUT_A);
+               OnRev(OUT_B);
+               Wait(90);
+               OnFwd(OUT_AB);
+               Wait(150);
+              }
+              if(SENSOR_2 < 90 && (SENSOR_1 < 45 || SENSOR_1 == 100) && (SENSOR_3<45 || SENSOR_3 == 100))
+              {
+                Off(OUT_AB);
+                while(true)
+                {
+                 endee:
+                 On(OUT_C);
+                 PlaySound(SOUND_UP);
+                 goto endee;
+                }
+              }
+             }
+             else
+             {
+              OnFwd(OUT_AB);
+             }
+             }
+
+         }
+         else
+         {
+          OnRev(OUT_AB);
+          Wait(20);
+          //links
+          OnFwd(OUT_B);
+          OnRev(OUT_A);
+          Wait(230);
+         }
+        }
+
+        if(SENSOR_1==100)
+        {
+          OnFwd(OUT_B);
+          OnRev(OUT_A);
+          Wait(20);
+          OnFwd(OUT_AB);
+          Wait(100);
+
+         if(SENSOR_2 > 90)
+         {
+            OnRev(OUT_AB);
+            Wait(60);
+            OnFwd(OUT_A);
+            OnRev(OUT_B);
+            Wait(100);
+            OnFwd(OUT_AB);
+            Wait(200);
+            if(SENSOR_1 == 100 || SENSOR_3 == 100)
+            {
+             OnRev(OUT_AB);
+             Wait(20);
+             //links
+             OnFwd(OUT_B);
+             OnRev(OUT_A);
+             Wait(230);
+            }
+            else
+            {
+             OnRev(OUT_AB);
+             Wait(200);
+             OnFwd(OUT_B);
+             OnRev(OUT_A);
+             Wait(100);
+             OnFwd(OUT_AB);
+             Wait(60);
+             if(SENSOR_2 > 90)
+             {
+              On(OUT_C);
+              Wait(100);
+              Off(OUT_C);
+              OnFwd(OUT_AB);
+              Wait(1000);
+              while(SENSOR_2 > 90)
+              {
+               OnFwd(OUT_A);
+               OnRev(OUT_B);
+               Wait(120);
+               OnFwd(OUT_AB);
+               Wait(1000);
+              }
+              if(SENSOR_2 < 90 && SENSOR_1 > 45 && SENSOR_3 > 45)
+              {
+               OnFwd(OUT_B);
+               OnRev(OUT_A);
+               Wait(10);
+               OnFwd(OUT_AB);
+               Wait(20);
+              if(SENSOR_2 < 90 && SENSOR_1 > 45 && SENSOR_3 > 45)
+              {
+               OnRev(OUT_AB);
+               Wait(20);
+               OnFwd(OUT_A);
+               OnRev(OUT_B);
+               Wait(20);
+               OnFwd(OUT_AB);
+               Wait(20);
+              }
+              }
+              if(SENSOR_1 < 45 && SENSOR_3 > 45)
+              {
+               OnRev(OUT_AB);
+               Wait(10);
+               OnFwd(OUT_B);
+               OnRev(OUT_A);
+               Wait(90);
+               OnFwd(OUT_AB);
+               Wait(150);
+              }
+              if(SENSOR_1 > 45 && SENSOR_3 < 45)
+              {
+               OnRev(OUT_AB);
+               Wait(10);
+               OnFwd(OUT_A);
+               OnRev(OUT_B);
+               Wait(90);
+               OnFwd(OUT_AB);
+               Wait(150);
+              }
+              if(SENSOR_2 < 90 && (SENSOR_1 < 45 || SENSOR_1 == 100) && (SENSOR_3<45 || SENSOR_3 == 100))
+              {
+               Off(OUT_AB);
+               while(true)
+               {
+                ende:
+                On(OUT_C);
+                PlaySound(SOUND_UP);
+                goto ende;
+               }
+              }
+              }
+              else
+             {
+              OnFwd(OUT_AB);
+             }
+             }
+             }
+
+         else
+         {
+          OnRev(OUT_AB);
+          Wait(20);
+          //rechts
+          OnFwd(OUT_A);
+          OnRev(OUT_B);
+          Wait(230);
+         }
+       }
+}
+}

@@ -1,0 +1,214 @@
+
+
+#define __NOTETIME   10
+#define __WAITTIME   12
+ int a=0 ;
+ int e= SENSOR_1 > 99 || SENSOR_3 > 99  ;
+ task main()
+{
+SetSensor(SENSOR_1,SENSOR_LIGHT);
+SetSensor(SENSOR_3,SENSOR_LIGHT);
+SetSensor(SENSOR_2,SENSOR_LIGHT);
+OnFwd(OUT_A+OUT_B);
+SetPower(OUT_A,9);
+SetPower(OUT_B,6);
+
+   while(1==1)
+
+
+     {
+     // Beginn Linie fahren
+     if (SENSOR_1 >=43 && SENSOR_1 <=52)
+     {
+
+        OnFwd(OUT_B);
+        OnRev(OUT_A);
+        Wait(19);
+
+
+      }
+     else
+     {
+        OnFwd(OUT_A+OUT_B);
+        ClearTimer(1);
+     }
+
+     if (SENSOR_3 >=42 && SENSOR_3 <47)
+     {
+        OnFwd(OUT_A);
+        OnRev(OUT_B);
+        Wait(19);
+     }
+     else
+     {
+        OnFwd(OUT_A+OUT_B);
+     }
+     // Ende Linie fahren
+     
+     // Beginn Grün
+      
+      if((SENSOR_1 >=53 && SENSOR_1 <=57 ) && (SENSOR_2 >=48 ) && (SENSOR_2 <=55) || (SENSOR_2 >=48) && (SENSOR_2 <=52) && (SENSOR_3 >=48 ) && (SENSOR_3 <=54))  // Grün gefunden
+      {
+       if(Timer(1)>150)
+       {
+      Off(OUT_A+OUT_B);
+      OnFwd(OUT_C);
+      Wait(150);
+      PlayTone(262,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(294,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(330,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(262,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      OnFwd(OUT_A+OUT_B);
+      Wait(10);
+      ClearTimer(1);
+       }
+
+       }
+      else
+      {
+       Off(OUT_C);
+      }
+      
+      // Ende grün
+
+      // Beginn silber
+
+      if((SENSOR_2 > 64 && SENSOR_3 > 62)||(SENSOR_1 >68 && SENSOR_2 > 64 )) // Silber gefunden
+      {
+       if(Timer(1)>150)
+       {
+         Off(OUT_A+OUT_B);
+         OnFwd(OUT_C);
+         Wait(150);
+         PlayTone(440,4*__NOTETIME);
+         PlayTone(659,4*__NOTETIME);
+         Wait(4*__WAITTIME);
+         PlayTone(494,4*__NOTETIME);
+         Wait(4*__WAITTIME);
+         OnFwd(OUT_C);
+         Wait(200);
+         OnFwd(OUT_A+OUT_B);
+         Wait(10);
+         ClearTimer(1);
+       }
+      }
+       else
+      {
+       Off(OUT_C);
+      }
+      // Ende silber
+
+
+
+      //Beginn Stein
+
+      if (SENSOR_1 > 99&&a==0 || SENSOR_3 > 99&&a==0 )
+      {
+       OnRev(OUT_A+OUT_B);
+       Wait(100);
+       OnFwd(OUT_A);
+       Wait(60);
+       OnRev(OUT_B);
+       Wait(60);
+       OnFwd(OUT_A+OUT_B);
+       Wait(200);
+       OnRev(OUT_A);
+       Wait(50);
+       OnFwd(OUT_B);
+       Wait(50);
+       OnFwd(OUT_A+OUT_B);
+       Wait(175);
+       OnFwd(OUT_B);
+       Wait(90);
+       OnRev(OUT_A);
+       Wait(90);
+       OnFwd(OUT_A+OUT_B);
+       Wait(192);
+       OnFwd(OUT_A);
+       Wait(55);
+       OnRev(OUT_B);
+       Wait(55);
+       }
+
+      
+      {
+
+        ClearTimer(1);
+       }
+      }
+       if(Timer(1) >180 )
+      {
+      a=1 ;
+      OnRev(OUT_A+OUT_B);
+      Wait(300);
+      OnRev(OUT_A);
+      Wait(89);
+      OnFwd(OUT_B);
+      Wait(89);
+      OnRev(OUT_A+OUT_B);
+      Wait(200);
+         if((SENSOR_2 > 64 && SENSOR_3 > 62)||(SENSOR_1 >68&& SENSOR_2 > 64 )) // Silber gefunden
+      {
+       if(Timer(1)>150)
+       {
+         Off(OUT_A+OUT_B);
+         OnFwd(OUT_C);
+         Wait(150);
+         PlayTone(440,4*__NOTETIME);
+         PlayTone(659,4*__NOTETIME);
+         Wait(4*__WAITTIME);
+         PlayTone(494,4*__NOTETIME);
+         Wait(4*__WAITTIME);
+         OnFwd(OUT_C);
+         Wait(200);
+         OnFwd(OUT_A+OUT_B);
+         Wait(10);
+         ClearTimer(1);
+       }  // Beginn Grün
+
+      if((SENSOR_1 >=53 && SENSOR_1 <=57 ) && (SENSOR_2 >=48) && (SENSOR_2 <=55) || (SENSOR_2 >=48) && (SENSOR_2 <=52) && (SENSOR_3 >=48) && (SENSOR_3 <=54))  // Grün gefunden
+      {
+       if(Timer(1)>150)
+       {
+      Off(OUT_A+OUT_B);
+      OnFwd(OUT_C);
+      Wait(150);
+      PlayTone(262,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(294,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(330,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      PlayTone(262,4*__NOTETIME);
+      Wait(4*__WAITTIME);
+      OnFwd(OUT_A+OUT_B);
+      Wait(10);
+      ClearTimer(1);
+       }
+
+       }
+      else
+      {
+       Off(OUT_C);
+      }
+
+      // Ende grün
+
+      }
+       else
+      {
+       Off(OUT_C);
+      }
+      // Ende silber
+
+    }
+ }
+
+
+
+
+

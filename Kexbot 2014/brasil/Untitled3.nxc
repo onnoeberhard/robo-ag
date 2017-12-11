@@ -1,0 +1,66 @@
+#define rmot                 mr     // rechter Motor
+#define lmot		             ml    //  linker Motor
+#define greifarm		         OUT_B    // motor für greifarm
+#define mots                 OUT_AC                    //motoren
+#define off                  Off(OUT_ABC);             // aus für alle motoren
+
+#define touch                (touch1 || touch2 || touchO || touchU)
+
+// white difines
+#define weiss1               SENSOR_2 > wss2-pm_white && SENSOR_2 < wss2+pm_white+pm_silver
+#define weiss2               SENSOR_1 > wss1-pm_white && SENSOR_1 < wss1+pm_white+pm_silver
+#define weiss3               SENSOR_4 > wss4-pm_white && SENSOR_4 < wss4+pm_white+pm_silver
+#define weiss4               SENSOR_3 > wss3-pm_white && SENSOR_3 < wss3+pm_white+pm_silver
+
+// black defines
+#define schwarz1             SENSOR_2 > sw2-pm_dunkel && SENSOR_2 < sw2+pm_black
+#define schwarz2             SENSOR_1 > sw1-pm_dunkel && SENSOR_1 < sw1+pm_black
+#define schwarz3             SENSOR_4 > sw4-pm_dunkel && SENSOR_4 < sw4+pm_black
+#define schwarz4             SENSOR_3 > sw3-pm_dunkel && SENSOR_3 < sw3+pm_black
+
+#define silber (SENSOR_1 < 40 && SENSOR_4 < 40)
+// touch defines
+#define touchU               SENSOR_3 == 100
+#define touchO               SENSOR_2 == 100
+#define rampen_touch         SENSOR_2 >= 80 && SENSOR_2 < 100
+#define greifarm_touch       SENSOR_4 >= 78 && SENSOR_4 < 100
+
+
+
+#define fwd		               OnFwd(rmot,r_pow); OnFwd(lmot,l_pow)
+#define rev		               OnRev(rmot,r_rev); OnRev(lmot,l_rev)
+task main() {
+ int sw1 = 36, sw2 = 32, sw3 = 36, sw4 = 31;
+SetSensorLight(S2);
+ SetSensor(S1,SENSOR_LIGHT);
+ SetSensor(S4,SENSOR_LIGHT);
+ SetSensorLight(S3);
+ mr = OUT_A;
+ ml = OUT_C;
+ s1 = S1;
+ s2 = S4;
+ #define touch1               Sensor(s1) == 100
+ #define touch2               Sensor(s2) == 100
+int x=0;
+ while(true) {
+  if(schwarz1 && schwarz3) {
+   if(touch1) {
+    x++;
+    if(x == 3) {
+     OnFwd(OUT_B, 100);
+     Wait(500);
+     OnRev(OUT_B, 100);
+     Wait(500);
+     OnFwd(OUT_B, 100);
+     Wait(500);
+     OnRev(OUT_B, 100);
+     Wait(500);
+     OnFwd(OUT_B, 100);
+     Wait(500);
+     OnRev(OUT_B, 100);
+     Wait(500);
+    }
+   }
+  }
+ }
+}

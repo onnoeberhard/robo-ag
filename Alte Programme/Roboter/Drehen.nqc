@@ -1,0 +1,13 @@
+task main()
+{
+  while(true)
+  {
+    OnFwd(OUT_A);
+    OnRev(OUT_B);
+    Wait(120);
+    while(true)
+    {
+     Off(OUT_AB);
+    }
+  }
+}

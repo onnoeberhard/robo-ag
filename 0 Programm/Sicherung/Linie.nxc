@@ -1,0 +1,95 @@
+#define schwarz1 SENSOR_1 > sw1-15 && SENSOR_1 < sw1+15
+#define schwarz2 SENSOR_2 > sw2-15 && SENSOR_2 < sw2+15
+#define schwarz3 SENSOR_3 > sw3-15 && SENSOR_3 < sw3+15
+#define schwarz4 SENSOR_4 > sw4-15 && SENSOR_4 < sw4+15
+
+
+int sw1 = 29; int sw2 = 26; int sw3 = 38; int sw4 = 35;    //[s]ch[w]arz
+int motpow = 80; //[mot]or [pow]er
+int wz = 0; //[w]eiße [z]one
+int Timer1 = 0; //Timer für Rampe Messen (rampe auch [w]eiße [z]one)
+int Timer2 = 0; //Timer für Allgemeine FAIL-Verhinderung
+
+task main()
+{
+  SetSensorLight(S1);
+  SetSensorLight(S2);
+  SetSensorLight(S3);
+  SetSensorLight(S4);
+//------------------------------------------------------------------------------Programmstart
+  while(true)
+  {
+   OnFwd(OUT_AB, motpow);
+//--------------------------------------------------------------------------------------------------Linie
+    //--------------------------------------------------------------------------links
+    links:
+    if(schwarz1 && wz == 0)
+    {
+     while(schwarz1 || schwarz3)
+     {
+      while(schwarz1 && schwarz3)
+      {
+       Off(OUT_AB);
+       OnFwd(OUT_B, motpow);
+       Wait(500);
+      }
+      OnFwd(OUT_B, motpow);
+      OnRev(OUT_A, motpow);
+      Wait(200);
+      Off(OUT_AB);
+      OnFwd(OUT_B, motpow);
+      Wait(50);
+      if(schwarz2 && schwarz4 && (!(schwarz1 && schwarz3)))
+      goto rechts;
+     }
+     Timer1 = 0;
+     Timer2 = 0;
+     goto links;
+    }
+    //--------------------------------------------------------------------------rechts
+    rechts:
+    if(schwarz2 && wz == 0)
+    {
+     while(schwarz2 || schwarz4)
+     {
+      while(schwarz2 && schwarz4)
+      {
+       Off(OUT_AB);
+       OnFwd(OUT_A, motpow);
+       Wait(500);
+      }
+      OnFwd(OUT_A, motpow);
+      OnRev(OUT_B, motpow);
+      Wait(200);
+      Off(OUT_AB);
+      OnFwd(OUT_A, motpow);
+      Wait(50);
+      if(schwarz1 && schwarz3 && (!(schwarz2 && schwarz4)))
+      goto links;
+     }
+     Timer1 = 0;
+     Timer2 = 0;
+     goto rechts;
+    }
+    //--------------------------------------------------------------------------links2
+    if(schwarz3 && wz == 0)
+    {
+     OnFwd(OUT_B, motpow);
+     OnRev(OUT_A, motpow);
+     Wait(150);
+     OnFwd(OUT_AB, motpow);
+     Wait(25);
+     Timer1 = 0;
+    }
+    //--------------------------------------------------------------------------rechts2
+    if(schwarz4 && wz == 0)
+    {
+     OnFwd(OUT_A, motpow);
+     OnRev(OUT_B, motpow);
+     Wait(150);
+     OnFwd(OUT_AB, motpow);
+     Wait(25);
+     Timer1 = 0;
+    }
+  }
+}

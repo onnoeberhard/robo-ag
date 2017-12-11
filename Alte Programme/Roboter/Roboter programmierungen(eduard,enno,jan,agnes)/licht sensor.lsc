@@ -1,0 +1,41 @@
+program test {
+	
+	#include <RCX2.h>
+	#include <RCX2MLT.h>
+	#include <RCX2Sounds.h>
+	#include <RCX2Def.h>
+	sensor light1 on 1
+	light1 is light as percent
+	sensor light3 on 3
+	light3 is light as percent
+	
+	main {
+		ext InterfaceType "kFreestyle"
+		rcx_ClearTimers
+		bbs_GlobalReset([A B C])
+		try {
+			direction [ A C  ] [ ]
+			on [ A C  ] 
+		} retry on fail
+		try {
+			forever {
+				if light1 > 45{
+					off [ A  ] 
+				}
+				else
+				{
+					on [ A  ] 
+				} 
+				if light3 > 45{
+					off [ C  ] 
+				}
+				else
+				{
+					on [ C  ] 
+				} 
+			}
+		} retry on fail
+	}
+	
+	
+}

@@ -1,0 +1,47 @@
+#define schwarz1 SENSOR_1 > 38-15 && SENSOR_1 < 38+15
+#define schwarz3 SENSOR_2 > 34-15 && SENSOR_2 < 34+15
+
+int motpow = 100;
+int motpowr = -100;
+
+task main()
+{
+  SetSensorLight(S1);
+  SetSensorLight(S2);
+//------------------------------------------------------------------------------Programmstart
+  while(true)
+  {
+    OnFwd(OUT_AB, motpow);
+
+//------------------------------------------------------------------------------Linie erkennen Sensor 1
+    links:
+    if(schwarz1)
+    {
+     while(schwarz1)
+     {
+      OnFwd(OUT_B, motpow);
+      OnRev(OUT_A, motpow);
+      Wait(250);
+     }
+     OnFwd(OUT_B, motpow);
+     OnFwd(OUT_A, motpowr);
+     Wait(150);
+     goto links;
+    }
+//------------------------------------------------------------------------------Linie erkennen Sensor 3
+    rechts:
+    if(schwarz3)
+    {
+     while(schwarz3)
+     {
+      OnFwd(OUT_A, motpow);
+      OnRev(OUT_B, motpow);
+      Wait(250);
+     }
+     OnFwd(OUT_A, motpow);
+     OnFwd(OUT_B, motpowr);
+     Wait(150);
+     goto rechts;
+    }
+  }
+}

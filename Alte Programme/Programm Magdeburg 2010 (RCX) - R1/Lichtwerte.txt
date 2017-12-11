@@ -1,0 +1,19 @@
+WEIß:
+
+Sensor 1 : 49
+Sensor 2 : 74
+Sensor 3 : 55
+
+SCHWARZ:
+
+Sensor 1 : 35
+Sensor 2 : 55
+Sensor 3 : 37
+
+SILBER:
+
+Sensor 1 : 41
+Sensor 2 : 63 (Streifen) / 90 (Dose+weiß) / 71 (Dose+schwarz)
+Sensor 3 : 49
+
+Silber > Weiß > grün > schwarz

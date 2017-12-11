@@ -1,0 +1,159 @@
+// LICHT PORT 1 :  WEIß = 56 - 62 59
+// LICHT PORT 2 :  WEIß = 60 - 66 63
+// LICHT PORT 3 :  WEIß = 63 - 69 66
+// LICHT PORT 1 :  SCHWARZ = 46-48 47
+// LICHT PORT 2 :  SCHWARZ = 49-51 50
+// LICHT PORT 3 :  SCHWARZ = 49-51 50
+// LICHT PORT 1 :  GRÜN = 51-57 54
+// LICHT PORT 2 :  GRÜN = 52-58 55
+// LICHT PORT 3 :  GRÜN = 53-59 56
+// LICHT PORT 1 :  SILBER = 67-73 70
+// LICHT PORT 2 :  SILBER = 74-80 77
+// LICHT PORT 3 :  SILBER = 73-79 76
+/*int s1nu = 56;
+int s1no = 62;
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu =
+int s1nu = */
+task main()
+{
+  SetSensor(SENSOR_1, SENSOR_LIGHT);
+  SetSensor(SENSOR_2, SENSOR_LIGHT);
+  SetSensor(SENSOR_3, SENSOR_LIGHT);
+//  SetPower(OUT_AB,OUT_FULL);
+  
+  while(true)
+  {
+    OnFwd(OUT_A);
+    OnFwd(OUT_B);
+     // Linie erkennen Sensor 1
+    if (SENSOR_1 > 33 && SENSOR_1 < 53)
+    {
+      OnFwd(OUT_B);
+      OnRev(OUT_A);
+      Wait(10);
+    }
+
+    // Linie erkennen Sensor 3
+    if (SENSOR_3 > 44 && SENSOR_3 < 60)
+    {
+      OnFwd(OUT_A);
+      OnRev(OUT_B);
+      Wait(10);
+    }
+
+     //Stein
+    if(SENSOR_1==100)
+      {
+      OnFwd(OUT_AB);
+      Wait(25);
+      if(SENSOR_1==100&&SENSOR_3==100)
+        {
+        OnRev(OUT_AB);
+        Wait(50);
+        OnFwd(OUT_A);
+        OnRev(OUT_B);
+        Wait(115); // 90 Grad Kurve
+        OnFwd(OUT_AB);
+        Wait(100);
+        OnFwd(OUT_B);
+        OnRev(OUT_A);
+        Wait(80); // Kurve links
+        OnFwd(OUT_AB);
+        Wait(150);
+        OnFwd(OUT_B);
+        OnRev(OUT_A);
+        Wait(100); // Kurve links
+        OnFwd(OUT_AB);
+        Wait(100);
+         }
+      else
+      {
+        OnRev(OUT_A);
+        OnRev(OUT_B);
+        Wait(20);
+        OnFwd(OUT_A);
+        OnRev(OUT_B);
+        Wait(20);
+      }
+      }
+      
+      if(SENSOR_3==100)
+      {
+      OnFwd(OUT_AB);
+      Wait(25);
+      if(SENSOR_1==100&&SENSOR_3==100)
+        {
+        OnRev(OUT_AB);
+        Wait(50);
+        OnFwd(OUT_A);
+        OnRev(OUT_B);
+        Wait(115);      //Rechts(90 Grad)
+        OnFwd(OUT_AB);
+        Wait(100);
+        OnFwd(OUT_B);
+        OnRev(OUT_A);
+        Wait(80);      //Links
+        OnFwd(OUT_AB);
+        Wait(150);
+        OnFwd(OUT_B);
+        OnRev(OUT_A);
+        Wait(100);     //links
+        OnFwd(OUT_AB);
+        Wait(100);     //Vorne
+       }
+
+      else
+      {
+        OnRev(OUT_A);
+        OnRev(OUT_B);
+        Wait(20);
+        OnFwd(OUT_B);
+        OnRev(OUT_A);
+        Wait(20);
+      }
+      }
+
+
+    // Grünes Männchen erkennen
+   //if((SENSOR_1 >50 && SENSOR_1 <56  && SENSOR_2 >50  && SENSOR_2 <56&&Timer(0)>500) || (SENSOR_2 >50 && SENSOR_2 <56&& SENSOR_3 >50 && SENSOR_3 <56&&Timer(0)>500))       // Grün gefunden
+   if(SENSOR_2 >53  && SENSOR_2 <56)// Grün gefunden
+   {
+      Off(OUT_AB);
+      On(OUT_C);
+      PlaySound(SOUND_DOUBLE_BEEP);
+      Wait(100);
+      Off(OUT_C);
+      ClearTimer(0);
+      //OnFwd(OUT_AB);
+      //Wait(35);
+   }
+
+    //Silbernes Männchen erkennen
+//    if((SENSOR_2 > 70 && SENSOR_3 > 70&&Timer(0)>500 )||(SENSOR_1 >70 && SENSOR_2 > 70&&Timer(0)>500))// Silber gefunden
+    if(SENSOR_2 > 70)// Silber gefunden
+    {
+      Off(OUT_AB);
+      On(OUT_C);
+      PlaySound(SOUND_DOUBLE_BEEP);
+      Wait(100);
+      Off(OUT_C);
+      ClearTimer(0);
+      //OnFwd(OUT_AB);
+      //Wait(50);
+    }
+
+}
+}
+

@@ -1,0 +1,52 @@
+
+
+#define __NOTETIME   10
+#define __WAITTIME   12                     // Team: FireWave
+
+
+
+
+task main()
+{
+
+SetSensor(SENSOR_1,SENSOR_LIGHT);
+SetSensor(SENSOR_3,SENSOR_LIGHT);
+SetSensor(SENSOR_2,SENSOR_LIGHT);
+SetPower(OUT_A+OUT_B,9);
+   ClearTimer(2);
+
+   while(true)
+   {
+
+     // Beginn Linie fahren
+     if (SENSOR_1 >=40 && SENSOR_1 <=50)
+     {
+      OnRev(OUT_A+OUT_B);
+      Wait(5);
+      OnRev(OUT_A);         //links
+      Off(OUT_B);
+      Wait(10);
+     }
+     else
+     {
+        OnFwd(OUT_A+OUT_B);  //vor
+     }
+
+     if (SENSOR_3 >=40 && SENSOR_3 <=50)
+     {
+        OnRev(OUT_A+OUT_B);
+      Wait(5);
+      OnRev(OUT_B);         //rechts
+      Off(OUT_A);
+      Wait(10);
+     }
+     else
+     {
+        OnFwd(OUT_A+OUT_B);   //vor
+     }
+     
+     
+  }}
+     
+     
+     

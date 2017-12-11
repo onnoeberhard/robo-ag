@@ -1,0 +1,30 @@
+#define schwarz1 Sensor(S1) > 20 && Sensor(S1) < 40
+#define schwarz2 Sensor(S2) > 20 && Sensor(S2) < 40
+
+
+task main()
+{
+  /*SetSensor(SENSOR_1, SENSOR_LIGHT);
+  SetSensor(SENSOR_2, SENSOR_LIGHT);*/
+  //SetPower(OUT_BC,OUT_FULL);
+//------------------------------------------------------------------------------Programmstart
+  while(true)
+  {
+    OnRev(OUT_BC, 7);
+
+//------------------------------------------------------------------------------Linie erkennen Sensor 1
+    if (schwarz1)
+    {
+      OnRev(OUT_C,7);
+      OnFwd(OUT_B,7);
+      Wait(10);
+    }
+//------------------------------------------------------------------------------Linie erkennen Sensor 3
+    if (schwarz2)
+    {
+      OnRev(OUT_B,7);
+      OnFwd(OUT_C,7);
+      Wait(10);
+    }
+}
+}

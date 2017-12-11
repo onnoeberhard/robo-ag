@@ -1,0 +1,102 @@
+task main()
+{
+  SetSensor(SENSOR_1, SENSOR_LIGHT);
+  SetSensor(SENSOR_2, SENSOR_LIGHT);
+  SetSensor(SENSOR_3, SENSOR_LIGHT);
+
+  while(true)
+  {
+    OnFwd(OUT_AB);
+
+//------------------------------------------------------------------------------Stein und Wand
+          if(SENSOR_1 == 100)
+          {
+           OnFwd(OUT_AB);
+           Wait(30);
+           if(SENSOR_1 == 100 && SENSOR_3 == 100)
+           {
+             OnRev(OUT_AB);
+             Wait(50);
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(90);
+             OnFwd(OUT_AB);
+             Wait(100);
+             while(weiss1 && weiss3)
+             {
+              OnFwd(OUT_AB);
+              Wait(30);
+              OnRev(OUT_A);
+              OnFwd(OUT_B);
+              Wait(30);
+             }
+             while(weiss1 && weiss3)
+             {
+              OnFwd(OUT_A);
+              OnRev(OUT_B);
+              Wait(20);
+             }
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(30);
+             OnFwd(OUT_AB);
+             Wait(10);
+             ClearTimer(0);
+             }
+             else
+             {
+              OnRev(OUT_A);
+              OnRev(OUT_B);
+              Wait(20);
+              OnFwd(OUT_A);
+              OnRev(OUT_B);
+              Wait(30);
+             }
+          }
+
+          if(SENSOR_3 == 100 && wz == 0)
+          {
+           OnFwd(OUT_AB);
+           Wait(30);
+           if(SENSOR_1 == 100 && SENSOR_3 == 100)
+           {
+             OnRev(OUT_AB);
+             Wait(50);
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(90);
+             OnFwd(OUT_AB);
+             Wait(100);
+             while(weiss1 && weiss3)
+             {
+              OnFwd(OUT_AB);
+              Wait(30);
+              OnRev(OUT_A);
+              OnFwd(OUT_B);
+              Wait(30);
+             }
+             while(weiss1 && weiss3)
+             {
+              OnFwd(OUT_A);
+              OnRev(OUT_B);
+              Wait(20);
+             }
+             OnFwd(OUT_A);
+             OnRev(OUT_B);
+             Wait(30);
+             OnFwd(OUT_AB);
+             Wait(10);
+             ClearTimer(0);
+           }
+           else
+           {
+            OnRev(OUT_AB);
+            Wait(20);
+            OnFwd(OUT_B);
+            OnRev(OUT_A);
+            Wait(30);
+           }
+          }
+  }
+}
+

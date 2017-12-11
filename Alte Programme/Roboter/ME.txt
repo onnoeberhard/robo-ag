@@ -1,0 +1,33 @@
+/*  //  Grünes Männchen erkennen
+    if(SENSOR_2 >53  && SENSOR_2 <56)// Grün gefunden
+   {
+      OnRev(OUT_B);
+      OnFwd(OUT_A);
+      Wait(10);
+      if(SENSOR_2 >53  && SENSOR_2 <56)// Grün gefunden
+      {
+       OnRev(OUT_A);
+       OnFwd(OUT_B);
+       Wait(10);
+       Off(OUT_AB);
+       On(OUT_C);
+       PlaySound(SOUND_DOUBLE_BEEP);
+       Wait(100);
+       Off(OUT_C);
+       //ClearTimer(0);
+      }
+
+   }
+
+    //Silbernes Männchen erkennen
+//    if((SENSOR_2 > 70 && SENSOR_3 > 70&&Timer(0)>500 )||(SENSOR_1 >70 && SENSOR_2 > 70&&Timer(0)>500))// Silber gefunden
+    if(SENSOR_2 > 70)// Silber gefunden
+    {
+      Off(OUT_AB);
+      On(OUT_C);
+      PlaySound(SOUND_DOUBLE_BEEP);
+      Wait(100);
+      Off(OUT_C);
+      //ClearTimer(0);
+    }
+*/

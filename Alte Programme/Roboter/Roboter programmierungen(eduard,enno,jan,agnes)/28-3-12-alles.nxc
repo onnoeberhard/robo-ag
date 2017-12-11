@@ -1,0 +1,1195 @@
+//#define forward do { OnFwd(OUT_A, 100); OnFwd(OUT_C, 100); }
+
+int sw11=10; int sw12=35;
+int sw21=10; int sw22=47;
+int sw31=10; int sw32=55;
+int sw41=10; int sw42=45;
+
+int w11=40; int w12=85;
+int w21=52; int w22=85;
+int w31=56; int w32=85;
+int w41=50; int w42=80;
+
+int richtung = 0;
+int dose = 0;
+int schwarz=0;
+int wand=0;
+int weiss=0;
+int oben=0;
+int drehen = 0;
+int rz=0;
+int x=0;
+int stein=0;
+
+
+int podest1=0;
+int podest2=1;
+int podest3=0;
+
+
+task timer()
+{
+  while(1==1)
+  {
+    drehen++;
+    weiss++;
+    wand++;
+    schwarz++;
+    stein++;
+    Wait(100);
+  }
+}
+
+task main()
+{
+SetSensor(S1,SENSOR_LIGHT);  //Lichtsensor ganz links
+SetSensorLight(S2);          //Lichtsensor/Tastsensor in der Mitte links
+SetSensorLight(S3);          //Lichtsensor/Tastsensor in der Mitte rechts
+SetSensor(S4,SENSOR_LIGHT);  //Lichtsensor ganz rechts
+Wait(1000);
+OnFwd(OUT_A,100);
+OnFwd(OUT_C,100);
+
+start timer;
+while(true && rz == 0)
+{
+while ((SENSOR_2 < sw22 && SENSOR_2 > sw21) && (SENSOR_3 < sw32 && SENSOR_3 > sw31))
+{
+OnFwd(OUT_A,100);
+OnFwd(OUT_C,100);
+Wait(1);
+}
+
+/*
+if ((SENSOR_1 < 5) && (SENSOR_4 < 50))
+{
+OnFwd(OUT_AC,100);
+Wait(1000);
+}
+*/
+
+//SENSOR 1
+if ((SENSOR_1 < sw12) && (SENSOR_1 > sw11) && ((SENSOR_2 < sw22 && SENSOR_2 > sw21) || (SENSOR_3 < sw32 && SENSOR_3 > sw31) || (SENSOR_4 < sw42 && SENSOR_4 > sw41)))
+{
+weiss=0;
+OnFwdReg(OUT_AC,90,OUT_REGMODE_SYNC);
+Wait(180);
+wand=0;
+until ((SENSOR_3 < sw32) && (SENSOR_3 > sw31))// || rechterwinkel < 15)
+{
+OnFwd(OUT_C,100);
+OnRev(OUT_A,80);
+}
+weiss=0;
+OnFwd(OUT_A,90);
+OnRev(OUT_C,80);
+Wait(400);
+OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+}
+
+if ((SENSOR_1 < sw12 && SENSOR_1 > sw11) && (SENSOR_2 < w22 && SENSOR_2 > w21) && (SENSOR_3 < w32 && SENSOR_3 > w31) && (SENSOR_4 < w42 && SENSOR_4 > w41))
+{
+OnFwd(OUT_C, 100);
+OnRev(OUT_A, 100);
+Wait(100);
+}
+
+
+//SENSOR 2
+if ((SENSOR_2 < sw22) && (SENSOR_2 > sw21))// && schwarz > 5)
+{
+weiss=0;
+OnFwd(OUT_C,100);
+OnRev(OUT_A,100);
+Wait(15);  // 18
+wand=0;
+weiss=0;
+OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+}
+
+//SENSOR 3
+if ((SENSOR_3 < sw32) && (SENSOR_3 > sw31))// && schwarz > 5)
+{
+weiss=0;
+OnFwd(OUT_A,100);
+OnRev(OUT_C,100);
+Wait(25);// 27
+wand=0;
+weiss=0;
+OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+}
+
+//SENSOR 4
+if (((SENSOR_1 < sw12 && SENSOR_1 > sw11) || (SENSOR_2 < sw22 && SENSOR_2 > sw21) || (SENSOR_3 < sw32 && SENSOR_3 > sw31)) && (SENSOR_4 < sw42) && (SENSOR_4 > sw41))
+{
+OnFwdReg(OUT_AC,90,OUT_REGMODE_SYNC);
+Wait(180);
+wand=0;
+weiss=0;
+until ((SENSOR_2 < sw22) && (SENSOR_2 > sw21))
+{
+
+OnFwd(OUT_A,100);
+OnRev(OUT_C, 80);
+}
+weiss=0;
+OnFwd(OUT_C,80);
+OnRev(OUT_A,90);
+Wait(400);
+//OnFwdSync(OUT_AC,100,50);
+//Wait(1100);
+OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+}
+
+
+if ((SENSOR_1 < w12 && SENSOR_1 > w11) && (SENSOR_2 < w22 && SENSOR_2 > w21) && (SENSOR_3 < w32 && SENSOR_3 > w31) && (SENSOR_4 < sw42 && SENSOR_4 > sw41))
+{
+OnFwd(OUT_A, 100);
+OnRev(OUT_C, 100);
+Wait(100);
+}
+
+
+//LÜCKE
+if ((SENSOR_1 < w12 && SENSOR_1 > w11) && (SENSOR_2 < w22 && SENSOR_2 > w21) && (SENSOR_3 < w32 && SENSOR_3 > w31) && (SENSOR_4 < w42 && SENSOR_4 > w41))
+{
+OnFwd(OUT_A,100);
+OnFwd(OUT_C,100);
+}
+
+
+
+if  ((SENSOR_1 < sw12 && SENSOR_1 > sw11) && (SENSOR_2 < sw22 && SENSOR_2 > sw21) && (SENSOR_3 < sw32 && SENSOR_3 > sw31) && (SENSOR_4 < sw42 && SENSOR_4 > sw41))
+{
+weiss=0;
+OnFwd(OUT_A,100);
+OnFwd(OUT_C,100);
+Wait(700);
+
+}
+
+
+
+if (/*(SENSOR_2 < 80 && SENSOR_2 > 69) && (SENSOR_3 < 65 && SENSOR_3 > 49) && */(SENSOR_2 == 100) && wand > 10)
+{
+   OnRev(OUT_AC,70);
+   Wait(1000);
+   OnFwd(OUT_A,100);
+   OnRev(OUT_C,100);
+   Wait(300);
+   OnFwd(OUT_AC,100);
+   Wait(200);
+
+}
+
+
+if (/*(SENSOR_2 < 80 && SENSOR_2 > 69) && (SENSOR_3 < 65 && SENSOR_3 > 49) && */(SENSOR_3 == 100) && wand > 10)
+{
+   OnRev(OUT_AC,70);
+   Wait(750);
+   OnFwd(OUT_C,100);
+   OnRev(OUT_A,100);
+   Wait(300);
+   OnFwd(OUT_AC,100);
+   Wait(200);
+}
+
+//Beginn Hindernis umfahren
+//Anfag: Stein umfahren rechtsherum
+      if ((SENSOR_2==100 && SENSOR_3==100))// && ((SENSOR_2 > 68 && SENSOR_2 < 72) || (SENSOR_3 > 57 && SENSOR_3 < 61)))
+      {
+      weiss=0;
+      OnRev(OUT_AC,100);
+      Wait(500);
+      weiss=0;
+      OnFwd(OUT_A,100);
+      OnRev(OUT_C,100);
+      Wait(750);
+      weiss=0;
+      OnFwd(OUT_AC,100);
+      Wait(400);
+      weiss=0;
+      OnFwd(OUT_AC,100);
+      while ((SENSOR_1 < w12 && SENSOR_1 > w11 && SENSOR_2 < w22 && SENSOR_2 > w21/* && SENSOR_3 < 63 && SENSOR_3 > 40 && SENSOR_4 < 76 && SENSOR_4 > 50*/))
+    {
+    weiss=0;
+    while ((SENSOR_1 < w12 && SENSOR_1 > w11 && SENSOR_2 < w22 && SENSOR_2 > w21))// && SENSOR_3 < 63 && SENSOR_3 > 40 && SENSOR_4 < 76 && SENSOR_4 > 50))
+    {
+    weiss=0;
+    OnFwd(OUT_AC,100);
+    Wait(165);
+
+    OnRev(OUT_A, 100);
+    //Off(OUT_A);
+    OnFwd(OUT_C, 100);
+    Wait(90);
+    }
+
+    if ((SENSOR_2==100)||(SENSOR_3==100))
+    {
+    weiss=0;
+    OnRev(OUT_C,70);
+    OnRev(OUT_A,70);
+    Wait(600);
+    weiss=0;
+    OnFwd(OUT_A,100);
+    OnRev(OUT_C,100);
+    Wait(300);
+    weiss=0;
+    OnFwd(OUT_AC,100);
+    Wait(200);
+    OnFwd(OUT_AC,100);
+    }
+    }
+    if (SENSOR_1 < sw12 && SENSOR_1 > sw11 || SENSOR_2 < sw22 && SENSOR_2 > sw21 || SENSOR_3 < sw32 && SENSOR_3 > sw31 || SENSOR_4 < sw42 && SENSOR_4 > sw41)
+    {
+    //PlayTone(988,100);
+    //Wait(500);
+    weiss=0;
+    OnFwd(OUT_AC,100);
+    Wait(300);
+    weiss=0;
+
+    weiss=0;
+
+    OnFwd(OUT_A,100);
+    OnRev(OUT_C,100);
+    until ((SENSOR_1 < sw12 && SENSOR_1 > sw11) || (SENSOR_2 < sw22 && SENSOR_2 > sw21) || (SENSOR_3 < sw32 && SENSOR_3 > sw31)/* || (SENSOR_4 < sw42 && SENSOR_4 > sw41)*/);
+    OnFwd(OUT_A,100);
+    OnRev(OUT_C, 80);
+Wait(200);
+wand=0;
+weiss=0;
+
+weiss=0;
+
+OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+    weiss=0;
+  }
+  }
+  //Ende
+
+ if (weiss >= 125)
+  {
+  while (true)     //3 < 70
+{
+OnFwd(OUT_A,100);
+OnFwd(OUT_C,96);
+if ((SENSOR_2 == 100) && oben==0)
+{
+   OnRev(OUT_AC,50);
+   Wait(1000);
+   OnFwd(OUT_A,70);
+   OnRev(OUT_C,70);
+   Wait(300);
+   OnFwd(OUT_A,100);
+   OnFwd(OUT_C,100);
+   Wait(200);
+
+}
+
+
+if ((SENSOR_3 == 100) && oben==0)
+{
+   OnRev(OUT_AC,50);
+   Wait(750);
+   OnFwd(OUT_C,70);
+   OnRev(OUT_A,70);
+   Wait(300);
+   OnFwd(OUT_A,100);
+   OnFwd(OUT_C,100);
+   Wait(200);
+}
+
+if ((SENSOR_2 < 57) || (SENSOR_3 < 60))
+{
+OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+Wait(2000);
+Off(OUT_AC);
+Wait(1000);
+oben=1;
+}
+
+
+
+if (((SENSOR_2 < 57) || (SENSOR_3 < 60 )) && (SENSOR_2 == 100))
+{
+OnRevReg(OUT_AC,100,OUT_REGMODE_SYNC);
+Wait(200);
+OnFwd(OUT_C,70);
+OnRev(OUT_A,70);
+Wait(300);
+OnFwd(OUT_AC,100);
+Wait(200);
+}
+
+
+if (((SENSOR_2 == 100) && (SENSOR_3 == 100)) && (oben==1))
+{
+   RotateMotor(OUT_AC, -100, 400);
+   //OnFwd(OUT_A,100);
+   //OnRev(OUT_C,100);
+   //Wait(1000);
+   RotateMotorEx(OUT_AC, 100, 870, -100, true, false);
+   OnRev(OUT_AC,100);
+   Wait(2200);
+   OnFwd(OUT_A, 100);
+   OnFwd(OUT_C, 95);
+   until (SENSOR_2 > 72 && SENSOR_3 > 80);
+  SetSensorLight(S1);
+  SetSensorLight(S2);
+  SetSensorLight(S3);
+  SetSensorLight(S4);
+
+   Wait(10);
+   ResetRotationCount(OUT_A);
+   Wait(10);
+
+   OnFwdSync(OUT_AC, 100, 0);
+   Wait(1000);
+   OnFwdSync(OUT_AC, 100, 0);
+   rz=1;
+   Wait(100);
+   //StopAllTasks();
+}
+
+   //ROTE ZONE
+
+
+    while (rz==1)
+   {
+  OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+   SetSensorLight(S1);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+  until (MotorRotationCount(OUT_A) > 1400 || SENSOR_2 == 100 || SENSOR_3 == 100);
+  Off(OUT_AC);
+  Wait(10);
+  while (dose == 0)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+
+  if ((SENSOR_2 == 100 || SENSOR_3 == 100) && richtung == 0)
+  {
+    Off(OUT_AC);
+    Wait(10);
+   dose = 2;
+   Wait(100);
+   PlayTone(500, 700);
+   Off(OUT_AC);
+   Wait(1000);
+      break;
+   }
+
+   if ((MotorRotationCount(OUT_A) > 1200) && richtung == 0)
+   {
+   richtung = 1;
+   Off(OUT_AC);
+   Wait(100);
+   RotateMotorEx(OUT_AC, 100, 920, -100, true, false);
+   OnRev(OUT_AC,95);
+    Wait(2000);
+    ResetRotationCount(OUT_A);
+    Wait(10);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+   }
+
+   if ((SENSOR_2>99 || SENSOR_3>99) && (richtung == 1) && MotorRotationCount(OUT_A) < 2400)
+   {
+ Off(OUT_AC);
+ Wait(10);
+   dose = 2;
+   Wait(100);
+   PlayTone(500, 700);
+   Off(OUT_AC);
+   Wait(1000);
+      break;
+   }
+
+   if ((SENSOR_2>99 && SENSOR_3>99) && (richtung == 1) && MotorRotationCount(OUT_A) > 2550)
+   {
+    richtung=2;
+    OnRev(OUT_AC,50);
+    Wait(2000);
+    RotateMotorEx(OUT_AC, 100, 900, 100, true, false);
+    RotateMotor(OUT_AC,100, 250);
+    RotateMotorEx(OUT_AC, 100, 900, 100, true, false);
+    ResetRotationCount(OUT_A);
+    Wait(10);
+    OnRev(OUT_AC, 100);
+    Wait(3000);
+    ResetRotationCount(OUT_A);
+    Wait(10);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+   }
+
+    if ((SENSOR_2>99 || SENSOR_3>99) && (richtung == 2) && MotorRotationCount(OUT_A)< 2400)
+   {
+ Off(OUT_AC);
+   dose = 2;
+   Wait(100);
+   PlayTone(500, 700);
+   Off(OUT_AC);
+   Wait(1000);
+      break;
+   }
+
+
+    if ((SENSOR_2>99 && SENSOR_3>99) && (richtung == 2) && MotorRotationCount(OUT_A) > 2550)
+   {
+    richtung=3;
+    OnRev(OUT_AC,50);
+    Wait(2200);
+    RotateMotorEx(OUT_AC, 100, 870, -100, true, false);
+    RotateMotor(OUT_AC,100, 250);
+    RotateMotorEx(OUT_AC, 100, 850, -100, true, false);
+    OnRev(OUT_AC,100);
+    Wait(3000);
+    ResetRotationCount(OUT_A);
+    Wait(10);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+   }
+
+     if ((SENSOR_2>99 || SENSOR_3>99) && (richtung == 3) && MotorRotationCount(OUT_A) < 2400)
+   {
+ Off(OUT_AC);
+   dose = 2;
+   Wait(100);
+   PlayTone(500, 700);
+   Off(OUT_AC);
+   Wait(1000);
+      break;
+   }
+
+
+   if ((SENSOR_2>99 && SENSOR_3>99) && (richtung == 3) && MotorRotationCount(OUT_A) > 2550)
+   {
+    richtung=4;
+    RotateMotor(OUT_AC, -100, 1500);
+    RotateMotorEx(OUT_AC, 100, 900, 100, true, false);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,100);
+    until(SENSOR_2 == 100 && SENSOR_3 == 100);
+    OnRev(OUT_AC, 100);
+    Wait(700);
+    RotateMotorEx(OUT_AC, 100, 820, 100, true, false);
+    OnRev(OUT_AC, 100);
+    Wait(500);
+    RotateMotorEx(OUT_AC, 100, 820, 100, true, false);
+    OnRev(OUT_AC, 100);
+    Wait(700);
+    OnRev(OUT_AC, 100);
+    Wait(3000);
+    richtung =4;
+    ResetRotationCount(OUT_A);
+    Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+    until ((SENSOR_1 >= 54) || (SENSOR_4 >= 63) || ((SENSOR_2 == 100 && SENSOR_3 == 100) && MotorRotationCount(OUT_A) > 3400) || ((SENSOR_2 == 100 || SENSOR_3 == 100) && MotorRotationCount(OUT_A) < 3200));
+
+    if (SENSOR_1 >= 54)
+   {
+
+   Off(OUT_AC);
+   dose = 1;
+   Wait(100);
+   break;
+
+   }
+
+   if (SENSOR_4 >= 63)
+   {
+
+   Off(OUT_AC);
+   dose = 3;
+   Wait(100);
+   break;
+
+   }
+
+   if ((SENSOR_2>99 || SENSOR_3>99) && MotorRotationCount(OUT_A) < 3200)
+   {
+ Off(OUT_AC);
+   dose = 2;
+   Wait(100);
+   PlayTone(500, 700);
+   Off(OUT_AC);
+   Wait(1000);
+      break;
+   }
+
+   if ((SENSOR_2>99 && SENSOR_3>99) && MotorRotationCount(OUT_A) > 3400)
+   {
+    StopAllTasks();
+   }
+
+
+
+   }
+
+
+   if (SENSOR_1 >= 54)
+   {
+
+   Off(OUT_AC);
+   dose = 1;
+   Wait(100);
+   break;
+
+   }
+
+   if (SENSOR_4 >= 63)
+   {
+
+   Off(OUT_AC);
+   dose = 3;
+   Wait(100);
+   break;
+
+   }
+
+}
+
+
+
+while (dose == 1)       //Entfernungssensor
+{
+
+if (dose == 1)
+{
+OnFwd(OUT_AC, 100);
+Wait(300);
+RotateMotorEx(OUT_AC, 100, 850, 100, true, false);
+OnFwd(OUT_AC, 100);
+Wait(400);
+Off(OUT_AC);
+Wait(100);
+OnRev(OUT_B, 70);
+Wait(3000);
+OnRev(OUT_AC, 70);
+Wait(2000);
+Off(OUT_ABC);
+Wait(10);
+OnFwd(OUT_B, 70);
+Wait (1000);
+OnRev(OUT_AC, 70);
+Wait(200);
+OnFwd(OUT_B, 70);
+Wait(1000);
+Off(OUT_AC);
+Wait(2000);
+OnFwd(OUT_AC, 100);
+Wait(1000);
+Off(OUT_AC);
+Wait(1000);
+OnFwd(OUT_B, 100);
+Wait (2500);
+Off(OUT_AC);
+Wait(3000);
+RotateMotorEx(OUT_AC, 100, 830, -100, true, false);
+dose = 4;
+Wait(100);
+break;
+}
+
+if (dose == 4)
+{
+break;
+}
+}
+
+
+while (dose == 2)  //Tastsensor
+{
+if (dose == 2)
+{
+OnRev(OUT_AC, 100);
+Wait(200);
+RotateMotorEx(OUT_AC, 100, 850, 100, true, false);
+OnFwd(OUT_AC, 100);
+Wait(300);
+OnRev(OUT_A, 65);
+OnRev(OUT_C, 70);
+until (SENSOR_1 >= 54);
+OnFwd(OUT_AC, 100);
+Wait(200);
+//OnFwd(OUT_AC, 100);
+//Wait(200);
+RotateMotorEx(OUT_AC, 100, 900, 100, true, true);
+OnFwd(OUT_AC, 100);
+Wait(300);
+Off(OUT_AC);
+Wait(100);
+OnRev(OUT_B, 70);
+Wait(3000);
+OnRev(OUT_AC, 70);
+Wait(1200);
+OnFwd(OUT_B, 70);
+Wait (1000);
+OnRev(OUT_AC, 70);
+Wait(200);
+OnFwd(OUT_B, 70);
+Wait(1000);
+Off(OUT_AC);
+Wait(2000);
+OnFwd(OUT_AC, 100);
+Wait(1000);
+Off(OUT_AC);
+Wait(1000);
+OnFwd(OUT_B, 100);
+Wait (2500);
+Off(OUT_AC);
+Wait(3000);
+RotateMotorEx(OUT_AC, -100, 850, -100, true, false);
+OnFwd(OUT_AC, 100);
+Wait(700);
+RotateMotorEx(OUT_AC, -100, 740, -100, true, false);
+Wait(100);
+dose = 4;
+Wait(100);
+break;
+}
+
+if (dose == 4)
+{
+break;
+}
+
+}
+
+
+while (dose == 3)       //Entfernungssensor
+{
+
+if (dose == 3)
+{
+OnFwd(OUT_AC, 100);
+Wait(300);
+RotateMotorEx(OUT_AC, 100, 850, -100, true, false);
+OnFwd(OUT_AC, 100);
+Wait(400);
+Off(OUT_AC);
+Wait(100);
+OnRev(OUT_B, 70);
+Wait(3000);
+OnRev(OUT_AC, 70);
+Wait(2000);
+Off(OUT_ABC);
+Wait(10);
+OnFwd(OUT_B, 70);
+Wait (1000);
+OnRev(OUT_AC, 70);
+Wait(200);
+OnFwd(OUT_B, 70);
+Wait(1000);
+Off(OUT_AC);
+Wait(2000);
+OnFwd(OUT_AC, 100);
+Wait(1000);
+Off(OUT_AC);
+Wait(1000);
+OnFwd(OUT_B, 100);
+Wait (2500);
+Off(OUT_AC);
+Wait(3000);
+RotateMotorEx(OUT_AC, 100, 770, 100, true, false);
+dose = 4;
+Wait(100);
+break;
+}
+
+if (dose == 4)
+{
+break;
+}
+}
+
+
+while (dose == 4 && podest1 == 1)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+
+if (richtung == 0)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+
+if (richtung == 1)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, -100, 800, 100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, -100, 800, 100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+if (richtung == 2)
+{
+RotateMotorEx(OUT_AC, -100, 880, 100, true, false);
+OnFwd(OUT_AC, 100);
+Wait(1000);
+RotateMotorEx(OUT_AC, -100, 800, -100, true, false);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+if (richtung == 3)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, 100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, 100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+if (richtung == 4)
+{
+RotateMotorEx(OUT_AC, 100, 800, 100, true, false);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, 100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, 100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+
+if (dose==5)
+{
+break;
+}
+}
+
+while (dose == 5)
+{
+
+if (dose == 5)
+{
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 820, 100, true, false);
+OnRev(OUT_AC, 100);
+Wait(700);
+RotateMotorEx(OUT_AC, 100, 820, 100, true, false);
+OnRev(OUT_AC, 90);
+Wait(3000);
+Off(OUT_AC);
+Wait(1);
+OnRev(OUT_B, 100);
+Wait(3000);
+Off(OUT_B);
+Wait(100);
+OnFwd(OUT_AC, 80);
+Wait (4000);
+Off(OUT_AC);
+Wait(100);
+PlayTone(400, 500);
+Wait(300);
+PlayTone(400, 500);
+Wait(300);
+PlayTone(400, 500);
+Wait(300);
+StopAllTasks();
+}
+
+}
+
+
+while (dose == 4 && podest2 == 1)
+{
+ OnFwd(OUT_AC, 100);
+
+if (richtung == 0)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+
+if (richtung == 1)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, 100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+if (richtung == 2)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+if (richtung == 3)
+{
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+OnFwd(OUT_AC, 100);
+Wait(1000);
+RotateMotorEx(OUT_AC, 100, 800, 100, true, false);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, 100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+if (richtung == 4)
+{
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+
+if (dose==5)
+{
+break;
+}
+}
+
+while (dose == 5)
+{
+
+if (dose == 5)
+{
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 820, 100, true, false);
+OnRev(OUT_AC, 100);
+Wait(700);
+RotateMotorEx(OUT_AC, 100, 820, 100, true, false);
+OnRev(OUT_AC, 90);
+Wait(3000);
+Off(OUT_AC);
+Wait(1);
+OnRev(OUT_B, 100);
+Wait(3000);
+Off(OUT_B);
+Wait(100);
+OnFwd(OUT_AC, 80);
+Wait (4000);
+Off(OUT_AC);
+Wait(100);
+PlayTone(400, 500);
+Wait(300);
+PlayTone(400, 500);
+Wait(300);
+PlayTone(400, 500);
+Wait(300);
+StopAllTasks();
+}
+
+}
+
+
+
+
+while (dose == 4 && podest3 == 1)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+
+if (richtung == 0)
+{
+RotateMotorEx(OUT_AC, -100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,90);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+
+if (richtung == 1)
+{
+RotateMotorEx(OUT_AC, -100, 800, 100, true, false);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+Wait(1000);
+RotateMotorEx(OUT_AC, -100, 800, -100, true, false);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, -100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+if (richtung == 2)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 870, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+if (richtung == 3)
+{
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+if (richtung == 4)
+{
+RotateMotorEx(OUT_AC, 100, 800, 100, true, false);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 800, -100, true, false);
+Wait(100);
+OnFwd(OUT_A,100);
+  OnFwd(OUT_C,92);
+until (SENSOR_2 == 100 && SENSOR_3 == 100);
+dose = 5;
+Wait(100);
+break;
+}
+
+if (dose==5)
+{
+break;
+}
+}
+
+while (dose == 5)
+{
+
+if (dose == 5)
+{
+OnRev(OUT_AC, 100);
+Wait(500);
+RotateMotorEx(OUT_AC, 100, 820, 100, true, false);
+OnRev(OUT_AC, 100);
+Wait(700);
+RotateMotorEx(OUT_AC, 100, 820, 100, true, false);
+OnRev(OUT_AC, 90);
+Wait(3000);
+Off(OUT_AC);
+Wait(1);
+OnRev(OUT_B, 100);
+Wait(3000);
+Off(OUT_B);
+Wait(100);
+OnFwd(OUT_AC, 80);
+Wait (4000);
+Off(OUT_AC);
+Wait(100);
+OnFwd(OUT_B, 100);
+Wait(3000);
+Off(OUT_ABC);
+Wait(10);
+PlayTone(400, 500);
+Wait(300);
+PlayTone(400, 500);
+Wait(300);
+PlayTone(400, 500);
+Wait(300);
+StopAllTasks();
+}
+
+}
+
+
+}
+}
+}
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,33 @@
+/*
+/0LOGBOOK
+0
+
+*/
+program test {
+	
+	#include <RCX2.h>
+	#include <RCX2MLT.h>
+	#include <RCX2Sounds.h>
+	#include <RCX2Def.h>
+	
+	main {
+		ext InterfaceType "kFreestyle"
+		rcx_ClearTimers
+		bbs_GlobalReset([A B C])
+		try {
+			power [ A C  ] 1
+			on [ A C  ] 
+		} retry on fail
+		wait 600
+		try {
+			power [ A C  ] 8
+			on [ A C  ] 
+		} retry on fail
+		wait 500
+		try {
+			off [ A C  ] 
+		} retry on fail
+	}
+	
+	
+}

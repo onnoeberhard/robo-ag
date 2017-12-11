@@ -1,0 +1,206 @@
+//------------------------------------------------------------------------------Anfang
+#define schwarz1 SENSOR_1 > 38-15 && SENSOR_1 < 38+15
+#define schwarz3 SENSOR_2 > 38-15 && SENSOR_2 < 38+15
+#define weiss1 SENSOR_1 > 65-5 && SENSOR_1 < 65+5
+#define weiss3 SENSOR_2 > 64-5 && SENSOR_2 < 64+5
+#define silber1 SENSOR_1 > 76-5 && SENSOR_1 < 76+5
+#define silber3 SENSOR_2 > 64-5 && SENSOR_2 < 64+5
+
+#define dose2 SENSOR_3 > 71-20 && SENSOR_3 < 71+20
+
+#define touch1 SENSOR_1 == 100
+#define touch3 SENSOR_2 == 100
+
+//#define __NOTETIME   22
+//#define __WAITTIME   12
+
+
+int wzm = 1;
+int wz = 1;                                   // U N B E D I N G T  INT WZ = 0 !
+int motpow = 100;
+int motpowr = -100;
+int gefunden = 100;
+
+task main()
+{
+  SetSensorLight(S1);
+  SetSensorLight(S2);
+  SetSensorLight(S3);
+//------------------------------------------------------------------------------Programmstart
+  while(true)
+  {
+    OnFwd(OUT_AB, motpow);
+//------------------------------------------------------------------------------Rote Zone (wenn Silber gefunden(Linie))
+    if(silber1 && silber3 && wz == 1)
+    {
+     OnFwd(OUT_C, motpow);
+     Wait(1000);
+     Off(OUT_C);
+     
+     OnFwd(OUT_AB, motpow);
+     Wait(1000);
+     OnFwd(OUT_A, motpow);
+     OnFwd(OUT_B, motpowr);
+     Wait(1000);
+
+     while(true)
+     {
+      OnFwd(OUT_AB, motpow);
+
+//------------------------------------------------------------------------------Wand
+      if(touch1)
+      {
+       OnRev(OUT_AB, motpow);
+       Wait(700);
+       OnFwd(OUT_A, motpow);
+       OnFwd(OUT_B, motpowr);
+       Wait(2000);
+      }
+      if(touch3)
+      {
+       OnRev(OUT_AB, motpow);
+       Wait(700);
+       OnFwd(OUT_A, motpow);
+       OnFwd(OUT_B, motpowr);
+       Wait(2000);
+      }
+//------------------------------------------------------------------------------schwarz
+      if(schwarz1 || schwarz3)
+      {
+       OnRev(OUT_AB, motpow);
+       Wait(700);
+       OnFwd(OUT_A, motpow);
+       OnFwd(OUT_B, motpowr);
+       Wait(2000);
+      }
+//------------------------------------------------------------------------------2...x silber
+      if(silber1 && silber3)
+      {
+       OnRev(OUT_AB, motpow);
+       Wait(700);
+       OnFwd(OUT_A, motpow);
+       OnFwd(OUT_B, motpowr);
+       Wait(2000);
+      }
+//------------------------------------------------------------------------------Dose nach schwarz
+      if(dose2)
+      {
+       OnFwd(OUT_C, motpow);
+       PlayTone(523,1200);
+       Wait(3000);
+       Off(OUT_C);
+       while(true)
+       {
+        //Off(OUT_AB);
+        OnFwd(OUT_AB, gefunden);
+        Wait(1000);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(1000);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(1000);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(1000);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(1000);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(1000);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(1000);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(1000);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_A, gefunden);
+        OnRev(OUT_B, gefunden);
+        Wait(200);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(500);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_A, gefunden);
+        OnRev(OUT_B, gefunden);
+        Wait(200);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(500);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_A, gefunden);
+        OnRev(OUT_B, gefunden);
+        Wait(200);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(500);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_A, gefunden);
+        OnRev(OUT_B, gefunden);
+        Wait(200);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_AB, gefunden);
+        Wait(500);
+        if(schwarz1 || schwarz3)
+        goto schwarz;
+        OnFwd(OUT_A, gefunden);
+        OnRev(OUT_B, gefunden);
+        Wait(200);
+        schwarz:
+        if(schwarz1 || schwarz3)
+        {
+          Off(OUT_AB);
+          OnFwd(OUT_C, motpow);
+          PlayTone(659,1600);
+          Wait(280);
+          PlayTone(622,1600);
+          Wait(280);
+          PlayTone(659,1600);
+          Wait(280);
+          PlayTone(622,1600);
+          Wait(280);
+          PlayTone(659,1600);
+          Wait(280);
+          PlayTone(494,1600);
+          Wait(280);
+          PlayTone(587,1600);
+          Wait(280);
+          PlayTone(523,1600);
+          Wait(280);
+          PlayTone(440,1600);
+          Wait(280);
+          
+          OnRev(OUT_AB, motpow);
+          Wait(5000);
+          while(true)
+          {
+           Off(OUT_AB);
+           OnFwd(OUT_C, motpow);
+           PlayTone(523,1200);
+          }
+           
+        }
+       }
+      }
+     }
+    }
+  }
+}
+//------------------------------------------------------------------------------Ende

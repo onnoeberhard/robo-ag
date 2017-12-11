@@ -1,0 +1,189 @@
+task main()
+{
+  /*int schwarzl=51;
+  int schwarzr=53;
+  int gruenr=1;
+  int gruenl=1;
+  int silberr=1;
+  int silberl=1;*/
+  SetSensorLight(S1);
+  SetSensorTouch(S2);
+  SetSensorTouch(S3);
+  SetSensorLight(S4);
+  OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+  while(true)
+  {
+ _______________________________________beginn Linie fahren__________________________________________________________
+    if(S1<schwarzr+3&&S1>schwarzr-3)
+    {
+      OnFwd(OUT_A, 100);
+      OnRev(OUT_C, 100);
+      until(S1>/*weiﬂ*/&&S1</*weiﬂ*/)
+    }
+    else
+    {
+       if(S1<schwarzl+3&&S1>schwarzl-3)
+       {
+      OnFwd(OUT_C, 100);
+      OnRev(OUT_A, 100);
+      until(S1>/*weiﬂ*/&&S1</*weiﬂ*/)
+       }
+       else
+       {
+         OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+       }
+    }
+    
+    _______________________________________ende Linie fahren__________________________________________________________
+    
+    
+    
+    
+    
+    
+    
+    ________________________________________beginn maenchen______________________________________________________________
+       if((S1/*silber*/&&S1>/*silber*/)||(S4</*silber*/&&S4/*silber*/))
+       {
+         Off(OUT_AC);
+         PlayTone(450,500);
+         Wait(100);
+         OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+       }
+
+
+        if(S1</*gruenl*/+3&&S1>/*gruenl*/||S4</*gruenl*/&&S4>/*gruenl*/)
+       {
+         Off(OUT_AC);
+         PlayTone(450,500);
+         Wait(100);
+         OnFwdReg(OUT_AC,100,OUT_REGMODE_SYNC);
+       }
+________________________________________ende maenchen______________________________________________________________
+
+
+
+
+ ________________________________________beginn tastsensor ___________________________________________________________
+ 
+ 
+ if(S2==1)
+ {
+  OnFwd(OUT_A, 100);
+  OnRev(OUT_C, 100);
+  Wait(30);
+ }
+ 
+ 
+if(S3==1)
+ {
+  OnFwd(OUT_C, 100);
+  OnRev(OUT_A, 100);
+  Wait(30);
+ }
+
+if(S2==1&&S3==1)
+{
+ OnRev(OUT_AC, 100);
+ Wait(50);
+ OnFwd(OUT_A, 100);
+ OnRev(OUT_C, 100);
+ Wait(30);
+ OnFwd(OUT_AC, 100);
+ Wait(80);
+ Off(OUT_A, 100);
+ OnFwd(OUT_C, 100);
+ until(S2==1||S3==3)
+ if(S1>/*Schwarz*/&&S1</*Schwarz*/||S4>/*Schwarz*/&&S4</*Schwarz*/)
+ {
+ OnFwd(OUT_AC, 100);
+ Wait(10);
+ OnFwd(OUT_A, 100);
+ OnRev(OUT_C, 100);
+ Wait(30);
+ }
+ else
+ {
+ a=2;
+ }
+ 
+ 
+ if(a=2)
+ {
+  OnFwd(OUT_AC);
+ until(S2==1||S3==3)
+ if(S1>/*Schwarz*/&&S1</*Schwarz*/||S4>/*Schwarz*/&&S4</*Schwarz*/)
+ {
+ OnFwd(OUT_AC, 100);
+ Wait(10);
+ OnFwd(OUT_A, 100);
+ OnRev(OUT_C, 100);
+ Wait(30);
+ }
+ else
+ {
+ a=3;
+ }
+ }
+ if(a=3)
+ {
+  OnFwd(OUT_AC);
+ until(S2==1||S3==3)
+ if(S1>/*Schwarz*/&&S1</*Schwarz*/||S4>/*Schwarz*/&&S4</*Schwarz*/)
+ {
+ OnFwd(OUT_AC, 100);
+ Wait(10);
+ OnFwd(OUT_A, 100);
+ OnRev(OUT_C, 100);
+ Wait(30);
+ }
+ else
+ {
+ a=4;
+ }
+ 
+ 
+ }
+
+ if(a=4)
+ {
+  OnFwd(OUT_AC, 100);
+ until(S2==1||S3==3)
+ if(S1>/*Schwarz*/&&S1</*Schwarz*/||S4>/*Schwarz*/&&S4</*Schwarz*/)
+ {
+ OnFwd(OUT_AC, 100);
+ Wait(10);
+ OnFwd(OUT_A, 100);
+ OnRev(OUT_C, 100);
+ Wait(30);
+ }
+ else
+ {
+ a=5;
+ }
+
+ }
+ ________________________________________ende tastsensor______________________________________________________________
+ 
+ 
+ 
+ _________________________________________beginn timer_______________________________________________________________
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ _______________________________________ende timer ________________________________________________________________________
+ 
+
+  }
+}
